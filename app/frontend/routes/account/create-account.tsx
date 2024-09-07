@@ -6,7 +6,6 @@ import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-la
 
 export function CreateNewAccount() {
   return (
-    // TODO: Add SVG at the top of the card, and center it
     <FlowLayout>
       <Card title="Create New Account" showWealthFrontLogo={true}>
         <div className="space-y-2">
