@@ -9,19 +9,18 @@ interface Props {
   customClassNames?: string;
 }
 
-const classes = 'inline-block py-3 px-6 bg-[hsla(244,49%,49%,1)] text-white';
-
 export function Button({ href, children, type, customClassNames }: Props) {
+  const className = twMerge('inline-block py-3 px-6 bg-[hsla(244,49%,49%,1)] text-white', customClassNames);
   if (href) {
     return (
-      <Link to={href} className={twMerge(classes, customClassNames)}>
+      <Link to={href} className={className}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button type={type} className={classes}>
+    <button type={type} className={className}>
       {children}
     </button>
   );
