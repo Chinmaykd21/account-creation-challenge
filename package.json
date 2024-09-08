@@ -14,8 +14,10 @@
   "dependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.53.0",
     "react-router-dom": "6.16.0",
-    "tailwind-merge": "^2.5.2"
+    "tailwind-merge": "^2.5.2",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -24,6 +26,7 @@
     "@types/node": "18.17.17",
     "@types/react": "^18.2.21",
     "@types/react-dom": "18.2.7",
+    "@types/zxcvbn": "^4.4.5",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "@vitejs/plugin-react": "4.0.4",
