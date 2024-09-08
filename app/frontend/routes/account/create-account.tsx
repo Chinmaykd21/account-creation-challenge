@@ -4,7 +4,8 @@ import { Button } from 'app/frontend/reusable-components/button/button';
 import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import zxcvbn from 'zxcvbn'; // Password strength library
-import { twMerge } from 'tailwind-merge';
+import { FormError } from 'app/frontend/reusable-components/form/form-error';
+import { PasswordStrengthMeter } from './password-strength';
 
 type AccountFormSchema = {
   username: string;
@@ -29,7 +30,6 @@ export function CreateNewAccount() {
   });
 
   const [isBot, setIsBot] = useState<boolean>(false);
-  const [passwordStrength, setPasswordStrength] = useState<number>(0);
 
   // Set focus on username field initially
   useEffect(() => {
@@ -39,58 +39,15 @@ export function CreateNewAccount() {
   // Watch for password value to calculate its strength
   const passwordValue = watch('password');
 
-  useEffect(() => {
-    if (passwordValue) {
-      const result = zxcvbn(passwordValue);
-      setPasswordStrength(result.score); // Score varies from 0 (very weak) to 4 (very strong)
-    } else {
-      setPasswordStrength(0); // Reset score to 0 when password field is empty
-    }
-  }, [passwordValue]);
-
-  // Function to determine password strength text
-  const getPasswordStrengthText = (): string => {
-    switch (passwordStrength) {
-      case 0:
-        return 'Very Weak';
-      case 1:
-        return 'Weak';
-      case 2:
-        return 'Medium';
-      case 3:
-        return 'Strong';
-      case 4:
-        return 'Very Strong';
-      default:
-        return '';
-    }
-  };
-
-  // Function to get color based on password strength to provide visual feedback to the user
-  const getBarColor = (index: number): string => {
-    switch (passwordStrength) {
-      case 0:
-        return index === 0 ? 'bg-red-500' : 'bg-gray-300'; // Very Weak (only the first bar red)
-      case 1:
-        return index === 0 ? 'bg-orange-500' : 'bg-gray-300'; // Weak (only the first bar orange)
-      case 2:
-        return index < 2 ? 'bg-yellow-500' : 'bg-gray-300'; // Medium (first two bars yellow)
-      case 3:
-        return index < 3 ? 'bg-green-400' : 'bg-gray-300'; // Strong (first three bars green)
-      case 4:
-        return 'bg-green-700'; // Very Strong (all bars green)
-      default:
-        return 'bg-gray-300'; // Default gray color for all bars
-    }
-  };
-
   // Watch for honeypot value
   const honeypotValue = watch('honeypot');
 
   const onSubmit: SubmitHandler<AccountFormSchema> = (data) => {
-    // Bot submission detected, do not submit form values to the server
     if (honeypotValue) {
+      // Bot submission detected, do not submit form values to the server
       setIsBot(true);
+      // Below console statement will simulate sending metric to some kind of data collection tool, for example, datadog
+      console.info('[Info_Log]: Bot detected');
       return;
     }
     console.log('**** This is the data', data);
@@ -126,15 +83,9 @@ export function CreateNewAccount() {
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for username */}
-            {/* TODO: convert these to a re-usable component */}
-            <p
-              className={twMerge(
-                'text-red-600 text-xs min-h-[10px] opacity-0 transition-opacity duration-400 italic',
-                errors.username ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              {errors.username?.message}
-            </p>
+            <div className="min-h-[10px]">
+              {errors.username?.message && <FormError message={errors.username.message} />}
+            </div>
 
             {/* Password field */}
             <label htmlFor="password">Password</label>
@@ -148,7 +99,7 @@ export function CreateNewAccount() {
                   containsLettersAndNumbers: (value) =>
                     (/[a-zA-Z]/.test(value) && /\d/.test(value)) ||
                     'Password must contain at least one letter between [a-zA-Z] and one number between [1-9]',
-                  zxcvbnScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
+                  passwordStrengthScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
                 },
                 // TODO: Decide if this is duplicated and even required
                 // pattern: {
@@ -159,37 +110,17 @@ export function CreateNewAccount() {
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for password */}
-            {/* TODO: convert these to a re-usable component */}
-            <p
-              className={twMerge(
-                'text-red-600 text-xs min-h-[10px] opacity-0 transition-opacity duration-300 italic',
-                errors.password ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              {errors.password?.message}
-            </p>
-
-            {/* Password Strength Meter */}
-            <div className="grid grid-cols-4 gap-1 mt-1 min-h-[10px]">
-              {' '}
-              {/* Grid layout with reserved space */}
-              {[0, 1, 2, 3].map((index) => (
-                <div key={index} className={`h-2 ${getBarColor(index)} transition-colors duration-300`}></div>
-              ))}
+            <div className="min-h-[10px]">
+              {errors.password?.message && <FormError message={errors.password.message} />}
             </div>
 
-            {/* Display password strength text */}
-            <p className="mt-1 text-sm font-medium">Password Strength: {getPasswordStrengthText()}</p>
+            {/* Password Strength Meter */}
+            <PasswordStrengthMeter passwordValue={passwordValue} />
 
-            {/* Bot warning message with reserved space to avoid layout shift. */}
-            <p
-              className={twMerge(
-                'text-red-600 text-xs min-h-[10px] opacity-0 transition-opacity duration-300 italic',
-                isBot ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              Bot submission detected. Submission has been blocked.
-            </p>
+            {/* Bot error message with reserved space to avoid layout shift. */}
+            <div className="min-h-[10px]">
+              {isBot && <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />}
+            </div>
 
             {/* Allow users to create account only if form is dirty AND valid */}
             {/* TODO: Add loading state when form is submitted to the server for account creation */}
