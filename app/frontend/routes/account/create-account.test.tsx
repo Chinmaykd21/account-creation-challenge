@@ -17,7 +17,7 @@ describe('Create Account component', () => {
   //   await waitFor(() => expect(passwordInput).toHaveValue('validPassword123'));
   // };
 
-  test.only('renders the form correctly', () => {
+  test('renders the form correctly', () => {
     render(
       <MemoryRouter>
         <CreateNewAccount />
