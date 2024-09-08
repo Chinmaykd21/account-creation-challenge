@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card } from 'app/frontend/reusable-components/card/card';
-import { Button } from 'app/frontend/reusable-components/button/button';
-import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
+import { Card } from '../../reusable-components/card/card';
+import { Button } from '../../reusable-components/button/button';
+import { FlowLayout } from '../../reusable-components/flow-layout/flow-layout';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import zxcvbn from 'zxcvbn'; // Password strength library
-import { FormError } from 'app/frontend/reusable-components/form/form-error';
+import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
 
 type AccountFormSchema = {
@@ -61,12 +61,13 @@ export function CreateNewAccount() {
             {/* Honeypot hidden field for bot detection */}
             <div className="hidden">
               <label htmlFor="honeypot">Honeypot</label>
-              <input type="text" {...register('honeypot')} />
+              <input id="honeypot" type="text" {...register('honeypot')} />
             </div>
             {/* Username field */}
             <label htmlFor="username">Username</label>
             <input
               type="text"
+              id="username"
               {...register('username', {
                 required: 'Username is required',
                 minLength: { value: 10, message: 'Username must be at least 10 characters' },
@@ -87,6 +88,7 @@ export function CreateNewAccount() {
             <label htmlFor="password">Password</label>
             <input
               type="text"
+              id="password"
               {...register('password', {
                 required: 'Password is required',
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
