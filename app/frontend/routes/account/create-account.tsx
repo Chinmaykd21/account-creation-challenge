@@ -13,7 +13,6 @@ type AccountFormSchema = {
 };
 
 export function CreateNewAccount() {
-  const [isBot, setIsBot] = useState<boolean>(false);
   const {
     register,
     watch,
@@ -29,13 +28,61 @@ export function CreateNewAccount() {
     },
   });
 
+  const [isBot, setIsBot] = useState<boolean>(false);
+  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+
   // Set focus on username field initially
   useEffect(() => {
     setFocus('username');
   }, [setFocus]);
 
-  // Regex pattern to allow only alphanumeric characters (no special characters)
-  const noSpecialCharactersPattern = /^[a-zA-Z0-9]*$/;
+  // Watch for password value to calculate its strength
+  const passwordValue = watch('password');
+
+  useEffect(() => {
+    if (passwordValue) {
+      const result = zxcvbn(passwordValue);
+      setPasswordStrength(result.score); // Score varies from 0 (very weak) to 4 (very strong)
+    } else {
+      setPasswordStrength(0); // Reset score to 0 when password field is empty
+    }
+  }, [passwordValue]);
+
+  // Function to determine password strength text
+  const getPasswordStrengthText = (): string => {
+    switch (passwordStrength) {
+      case 0:
+        return 'Very Weak';
+      case 1:
+        return 'Weak';
+      case 2:
+        return 'Medium';
+      case 3:
+        return 'Strong';
+      case 4:
+        return 'Very Strong';
+      default:
+        return '';
+    }
+  };
+
+  // Function to get color based on password strength to provide visual feedback to the user
+  const getBarColor = (index: number): string => {
+    switch (passwordStrength) {
+      case 0:
+        return index === 0 ? 'bg-red-500' : 'bg-gray-300'; // Very Weak (only the first bar red)
+      case 1:
+        return index === 0 ? 'bg-orange-500' : 'bg-gray-300'; // Weak (only the first bar orange)
+      case 2:
+        return index < 2 ? 'bg-yellow-500' : 'bg-gray-300'; // Medium (first two bars yellow)
+      case 3:
+        return index < 3 ? 'bg-green-400' : 'bg-gray-300'; // Strong (first three bars green)
+      case 4:
+        return 'bg-green-700'; // Very Strong (all bars green)
+      default:
+        return 'bg-gray-300'; // Default gray color for all bars
+    }
+  };
 
   // Watch for honeypot value
   const honeypotValue = watch('honeypot');
@@ -49,6 +96,9 @@ export function CreateNewAccount() {
     console.log('**** This is the data', data);
     setIsBot(false);
   };
+
+  // Regex pattern to allow only alphanumeric characters (no special characters)
+  const noSpecialCharactersPattern = /^[a-zA-Z0-9]*$/;
 
   return (
     <FlowLayout>
@@ -76,6 +126,7 @@ export function CreateNewAccount() {
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for username */}
+            {/* TODO: convert these to a re-usable component */}
             <p
               className={twMerge(
                 'text-red-600 text-xs min-h-[10px] opacity-0 transition-opacity duration-400 italic',
@@ -99,14 +150,16 @@ export function CreateNewAccount() {
                     'Password must contain at least one letter between [a-zA-Z] and one number between [1-9]',
                   zxcvbnScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
                 },
-                pattern: {
-                  value: noSpecialCharactersPattern,
-                  message: 'Username must not contain special characters, commas, or quotes',
-                },
+                // TODO: Decide if this is duplicated and even required
+                // pattern: {
+                //   value: noSpecialCharactersPattern,
+                //   message: 'Username must not contain special characters, commas, or quotes',
+                // },
               })}
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for password */}
+            {/* TODO: convert these to a re-usable component */}
             <p
               className={twMerge(
                 'text-red-600 text-xs min-h-[10px] opacity-0 transition-opacity duration-300 italic',
@@ -115,6 +168,18 @@ export function CreateNewAccount() {
             >
               {errors.password?.message}
             </p>
+
+            {/* Password Strength Meter */}
+            <div className="grid grid-cols-4 gap-1 mt-1 min-h-[10px]">
+              {' '}
+              {/* Grid layout with reserved space */}
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} className={`h-2 ${getBarColor(index)} transition-colors duration-300`}></div>
+              ))}
+            </div>
+
+            {/* Display password strength text */}
+            <p className="mt-1 text-sm font-medium">Password Strength: {getPasswordStrengthText()}</p>
 
             {/* Bot warning message with reserved space to avoid layout shift. */}
             <p
