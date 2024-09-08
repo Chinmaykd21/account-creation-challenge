@@ -14,6 +14,8 @@ type AccountFormSchema = {
 };
 
 export function CreateNewAccount() {
+  const [isBot, setIsBot] = useState<boolean>(false);
+
   const {
     register,
     watch,
@@ -29,17 +31,11 @@ export function CreateNewAccount() {
     },
   });
 
-  const [isBot, setIsBot] = useState<boolean>(false);
-
-  // Set focus on username field initially
   useEffect(() => {
     setFocus('username');
   }, [setFocus]);
 
-  // Watch for password value to calculate its strength
   const passwordValue = watch('password');
-
-  // Watch for honeypot value
   const honeypotValue = watch('honeypot');
 
   const onSubmit: SubmitHandler<AccountFormSchema> = (data) => {
