@@ -6,10 +6,11 @@ interface Props {
   type?: 'button' | 'submit';
   href?: string;
   children: ReactNode;
+  isDisabled?: boolean;
   customClassNames?: string;
 }
 
-export function Button({ href, children, type, customClassNames }: Props) {
+export function Button({ href, children, type, customClassNames, isDisabled = false }: Props) {
   const className = twMerge('inline-block py-3 px-6 bg-[hsla(244,49%,49%,1)] text-white', customClassNames);
   if (href) {
     return (
@@ -20,7 +21,7 @@ export function Button({ href, children, type, customClassNames }: Props) {
   }
 
   return (
-    <button type={type} className={className}>
+    <button type={type} className={className} disabled={isDisabled}>
       {children}
     </button>
   );
