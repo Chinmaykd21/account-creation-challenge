@@ -50,9 +50,6 @@ export function CreateNewAccount() {
     setIsBot(false);
   };
 
-  // Regex pattern to allow only alphanumeric characters (no special characters)
-  const noSpecialCharactersPattern = /^[a-zA-Z0-9]*$/;
-
   return (
     <FlowLayout>
       <Card title="Create New Account" showWealthFrontLogo={true}>
@@ -72,10 +69,6 @@ export function CreateNewAccount() {
                 required: 'Username is required',
                 minLength: { value: 10, message: 'Username must be at least 10 characters' },
                 maxLength: { value: 50, message: 'Username must be at most 50 characters' },
-                pattern: {
-                  value: noSpecialCharactersPattern,
-                  message: 'Username must not contain special characters, commas, or quotes',
-                },
               })}
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
@@ -94,16 +87,12 @@ export function CreateNewAccount() {
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
                 maxLength: { value: 50, message: 'Password must be at most 50 characters' },
                 validate: {
-                  containsLettersAndNumbers: (value) =>
-                    (/[a-zA-Z]/.test(value) && /\d/.test(value)) ||
-                    'Password must contain at least one letter between [a-zA-Z] and one number between [1-9]',
                   passwordStrengthScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
                 },
-                // TODO: Decide if this is duplicated and even required
-                // pattern: {
-                //   value: noSpecialCharactersPattern,
-                //   message: 'Username must not contain special characters, commas, or quotes',
-                // },
+                pattern: {
+                  value: /^(?=.*[a-zA-Z])(?=.*[1-9]).*$/,
+                  message: 'Password must contain at least one letter between [a-zA-Z] and one number between [1-9]',
+                },
               })}
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
