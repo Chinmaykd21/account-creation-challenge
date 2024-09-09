@@ -42,7 +42,7 @@ export function CreateNewAccount() {
     if (honeypotValue) {
       // Bot submission detected, do not submit form values to the server
       setIsBot(true);
-      // Below console statement will simulate sending metric to some kind of data collection tool, for example, datadog
+      // Simulate sending metric to some kind of data collection tool, for example, datadog
       console.info('[Info_Log]: Bot detected');
       return;
     }
