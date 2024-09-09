@@ -64,7 +64,9 @@ export const PasswordStrengthMeter: FC<Readonly<PasswordStrengthMeterProps>> = (
       </div>
 
       {/* Display password strength text */}
-      <p className="mt-1 text-sm font-medium">Password Strength: {getPasswordStrengthText()}</p>
+      <p data-testid="password-strength" className="mt-1 text-sm font-medium">
+        Password Strength: {getPasswordStrengthText()}
+      </p>
     </>
   );
 };

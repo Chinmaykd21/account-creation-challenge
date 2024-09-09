@@ -61,6 +61,69 @@ describe('Create Account component', () => {
     });
   });
 
+  test('updates password strength at different password values', async () => {
+    render(
+      <MemoryRouter>
+        <CreateNewAccount />
+      </MemoryRouter>
+    );
+
+    fireEvent.input(screen.getByLabelText(/password/i), {
+      target: {
+        value: 'test',
+      },
+    });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Very Weak');
+    });
+
+    fireEvent.input(screen.getByLabelText(/password/i), {
+      target: {
+        value: 'test1',
+      },
+    });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Weak');
+    });
+
+    fireEvent.input(screen.getByLabelText(/password/i), {
+      target: {
+        value: 'test1Tester',
+      },
+    });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Medium');
+    });
+
+    fireEvent.input(screen.getByLabelText(/password/i), {
+      target: {
+        value: 'test1Tester12',
+      },
+    });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Strong');
+    });
+
+    fireEvent.input(screen.getByLabelText(/password/i), {
+      target: {
+        value: 'test1Tester12Long',
+      },
+    });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Very Strong');
+    });
+  });
+
   // TODO: This test is not working
   // test('detects bot submission, and displays bot detection error message upon form submission', async () => {
   //   render(
