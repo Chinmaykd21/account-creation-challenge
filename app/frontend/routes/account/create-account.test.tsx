@@ -34,7 +34,7 @@ describe('Create Account component', () => {
     expect(createAccountBtn).toBeDisabled();
   });
 
-  test('shows validation errors for incorrect form fields', async () => {
+  test('shows validation errors for invalid username field', async () => {
     render(
       <MemoryRouter>
         <CreateNewAccount />
@@ -47,15 +47,27 @@ describe('Create Account component', () => {
         value: 'test',
       },
     });
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByText('Username must be at least 10 characters')).toBeInTheDocument();
+    });
+  });
+
+  test('shows validation errors for invalid password field', async () => {
+    render(
+      <MemoryRouter>
+        <CreateNewAccount />
+      </MemoryRouter>
+    );
+
     fireEvent.input(screen.getByLabelText(/password/i), {
       target: {
         value: 'test',
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
-      expect(screen.getByText('Username must be at least 10 characters')).toBeInTheDocument();
       expect(screen.getByText('Password must be at least 20 characters')).toBeInTheDocument();
     });
 
@@ -84,7 +96,7 @@ describe('Create Account component', () => {
     });
   });
 
-  test('updates password strength at different password values', async () => {
+  test('displays equivalent strength keywords for strength score returned by validating password form field', async () => {
     render(
       <MemoryRouter>
         <CreateNewAccount />
@@ -97,9 +109,9 @@ describe('Create Account component', () => {
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
+    const passwordStrengthKeyword = screen.getByTestId('password-strength');
     await waitFor(() => {
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Very Weak');
+      expect(passwordStrengthKeyword).toHaveTextContent('Very Weak');
     });
 
     fireEvent.input(screen.getByLabelText(/password/i), {
@@ -110,7 +122,7 @@ describe('Create Account component', () => {
 
     // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Weak');
+      expect(passwordStrengthKeyword).toHaveTextContent('Weak');
     });
 
     fireEvent.input(screen.getByLabelText(/password/i), {
@@ -121,7 +133,7 @@ describe('Create Account component', () => {
 
     // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Medium');
+      expect(passwordStrengthKeyword).toHaveTextContent('Medium');
     });
 
     fireEvent.input(screen.getByLabelText(/password/i), {
@@ -132,7 +144,7 @@ describe('Create Account component', () => {
 
     // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Strong');
+      expect(passwordStrengthKeyword).toHaveTextContent('Strong');
     });
 
     fireEvent.input(screen.getByLabelText(/password/i), {
@@ -143,7 +155,7 @@ describe('Create Account component', () => {
 
     // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Very Strong');
+      expect(passwordStrengthKeyword).toHaveTextContent('Very Strong');
     });
   });
 
