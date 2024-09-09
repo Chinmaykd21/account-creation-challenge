@@ -18,7 +18,8 @@ const createAccount = async (formData: AccountFormSchema) => {
   try {
     const response = await axios.post('/api/create-account', {
       username: formData.username,
-      password: formData.password, // TODO: Encrypt password while sending via network
+      password: formData.password,
+      honeypot: formData.honeypot,
     });
     console.log('*** response sent successfully', response);
   } catch (error) {
@@ -28,6 +29,7 @@ const createAccount = async (formData: AccountFormSchema) => {
 
 export function CreateNewAccount() {
   const [isBot, setIsBot] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     register,
@@ -48,20 +50,22 @@ export function CreateNewAccount() {
     setFocus('username');
   }, [setFocus]);
 
-  // TODO: calculate passwordStrength here and disable button until it satisfies password strength
   const passwordValue = watch('password');
   const honeypotValue = watch('honeypot');
 
   const onSubmit: SubmitHandler<AccountFormSchema> = async (data) => {
+    setIsLoading(true);
     if (honeypotValue) {
       // Bot submission detected, do not submit form values to the server
       setIsBot(true);
+      setIsLoading(false);
       // Simulate sending metric to some kind of data collection tool, for example, datadog
       console.info('[info_log]: Bot detected');
       return;
     }
     await createAccount(data);
     setIsBot(false);
+    setIsLoading(false);
   };
 
   return (
@@ -105,7 +109,7 @@ export function CreateNewAccount() {
                 },
                 pattern: {
                   value: /^(?=.*[a-zA-Z])(?=.*[1-9]).*$/,
-                  message: 'Password must contain at least one letter between [a-zA-Z] and one number between [1-9]',
+                  message: 'Password must contain at least one letter and one number',
                 },
               })}
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
@@ -124,11 +128,11 @@ export function CreateNewAccount() {
             </div>
 
             {/* Allow users to create account only if form is dirty AND valid */}
-            {/* TODO: Add loading state when form is submitted to the server for account creation */}
+            {/* TODO: Style for isLoading state */}
             <Button
               customClassNames="w-full text-center rounded-xl hover:bg-[hsla(244,49%,39%,1)] disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
-              isDisabled={!isDirty || !isValid}
+              isDisabled={!isDirty || !isValid || isLoading}
             >
               Create Account
             </Button>
