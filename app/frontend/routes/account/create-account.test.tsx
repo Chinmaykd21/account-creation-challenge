@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { CreateNewAccount } from './create-account';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,7 +17,7 @@ describe('Create Account component', () => {
   //   await waitFor(() => expect(passwordInput).toHaveValue('validPassword123'));
   // };
 
-  test('renders the form correctly', () => {
+  test('renders the form correctly', async () => {
     render(
       <MemoryRouter>
         <CreateNewAccount />
@@ -28,5 +28,33 @@ describe('Create Account component', () => {
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
+  });
+
+  test('shows validation errors for incorrect fields on submission', async () => {
+    render(
+      <MemoryRouter>
+        <CreateNewAccount />
+      </MemoryRouter>
+    );
+
+    fireEvent.input(screen.getByRole('textbox', { name: /Username/i }), {
+      target: {
+        value: 'test',
+      },
+    });
+    fireEvent.input(screen.getByRole('textbox', { name: /Password/i }), {
+      target: {
+        value: 'test',
+      },
+    });
+
+    const submitButton = screen.getByRole('button', { name: /Create Account/i });
+    fireEvent.click(submitButton); // Click submit without filling in the form
+
+    // Use waitFor to handle the async nature of form validation
+    await waitFor(() => {
+      expect(screen.getByText('Username must be at least 10 characters')).toBeInTheDocument();
+      expect(screen.getByText('Password must be at least 20 characters')).toBeInTheDocument();
+    });
   });
 });
