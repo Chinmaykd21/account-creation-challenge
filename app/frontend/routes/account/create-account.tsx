@@ -6,11 +6,24 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import zxcvbn from 'zxcvbn'; // Password strength library
 import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
+import axios from 'axios';
 
 type AccountFormSchema = {
   username: string;
   password: string;
   honeypot: string; // This field will be hidden from the user but present in dom.
+};
+
+const createAccount = async (formData: AccountFormSchema) => {
+  try {
+    const response = await axios.post('/api/create-account', {
+      username: formData.username,
+      password: formData.password, // TODO: Encrypt password while sending via network
+    });
+    console.log('*** response sent successfully', response);
+  } catch (error) {
+    console.error('[submission_Error]: Error while sending data', error);
+  }
 };
 
 export function CreateNewAccount() {
@@ -35,18 +48,19 @@ export function CreateNewAccount() {
     setFocus('username');
   }, [setFocus]);
 
+  // TODO: calculate passwordStrength here and disable button until it satisfies password strength
   const passwordValue = watch('password');
   const honeypotValue = watch('honeypot');
 
-  const onSubmit: SubmitHandler<AccountFormSchema> = (data) => {
+  const onSubmit: SubmitHandler<AccountFormSchema> = async (data) => {
     if (honeypotValue) {
       // Bot submission detected, do not submit form values to the server
       setIsBot(true);
       // Simulate sending metric to some kind of data collection tool, for example, datadog
-      console.info('[Info_Log]: Bot detected');
+      console.info('[info_log]: Bot detected');
       return;
     }
-    console.log('**** This is the data', data);
+    await createAccount(data);
     setIsBot(false);
   };
 
