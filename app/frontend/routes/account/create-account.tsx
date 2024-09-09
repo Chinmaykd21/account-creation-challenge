@@ -71,7 +71,7 @@ export function CreateNewAccount() {
               {...register('username', {
                 required: 'Username is required',
                 minLength: { value: 10, message: 'Username must be at least 10 characters' },
-                maxLength: { value: 50, message: 'Username must be at least 50 characters' },
+                maxLength: { value: 50, message: 'Username must be at most 50 characters' },
                 pattern: {
                   value: noSpecialCharactersPattern,
                   message: 'Username must not contain special characters, commas, or quotes',
@@ -80,19 +80,19 @@ export function CreateNewAccount() {
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for username */}
-            <div className="min-h-[10px]">
+            <div className="min-h-[10px]" id="username-error">
               {errors.username?.message && <FormError message={errors.username.message} />}
             </div>
 
             {/* Password field */}
             <label htmlFor="password">Password</label>
             <input
-              type="text"
+              type="password"
               id="password"
               {...register('password', {
                 required: 'Password is required',
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
-                maxLength: { value: 50, message: 'Password must be at least 50 characters' },
+                maxLength: { value: 50, message: 'Password must be at most 50 characters' },
                 validate: {
                   containsLettersAndNumbers: (value) =>
                     (/[a-zA-Z]/.test(value) && /\d/.test(value)) ||
@@ -108,7 +108,7 @@ export function CreateNewAccount() {
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
             {/* Error message for password */}
-            <div className="min-h-[10px]">
+            <div className="min-h-[10px]" id="password-error">
               {errors.password?.message && <FormError message={errors.password.message} />}
             </div>
 
@@ -116,7 +116,7 @@ export function CreateNewAccount() {
             <PasswordStrengthMeter passwordValue={passwordValue} />
 
             {/* Bot error message with reserved space to avoid layout shift. */}
-            <div className="min-h-[10px]">
+            <div className="min-h-[10px]" id="honeypot-error">
               {isBot && <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />}
             </div>
 
