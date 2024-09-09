@@ -5,65 +5,54 @@ import { CreateNewAccount } from './create-account';
 import { MemoryRouter } from 'react-router-dom';
 
 describe('Create Account component', () => {
-  // Utility to fill out the form
-  // const fillForm = async () => {
-  //   const usernameInput = screen.getByLabelText(/username/i);
-  //   const passwordInput = screen.getByLabelText(/password/i);
-
-  //   fireEvent.change(usernameInput, { target: { value: 'validusername' } });
-  //   fireEvent.change(passwordInput, { target: { value: 'validPassword123' } });
-
-  //   await waitFor(() => expect(usernameInput).toHaveValue('validusername'));
-  //   await waitFor(() => expect(passwordInput).toHaveValue('validPassword123'));
-  // };
-
-  test('renders the form correctly', async () => {
+  const setup = () => {
     render(
       <MemoryRouter>
         <CreateNewAccount />
       </MemoryRouter>
     );
 
-    // Check that all the form fields are present
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    const USERNAME_LABEL = /username/i;
+    const PASSWORD_LABEL = /password/i;
+    const SUBMIT_BUTTON_LABEL = /create account/i;
 
-    const createAccountBtn = screen.getByRole('button', { name: /create account/i });
+    return { USERNAME_LABEL, PASSWORD_LABEL, SUBMIT_BUTTON_LABEL };
+  };
+
+  test('renders the form correctly', async () => {
+    const { USERNAME_LABEL, PASSWORD_LABEL, SUBMIT_BUTTON_LABEL } = setup();
+
+    // Check that all the form fields are present
+    expect(screen.getByLabelText(USERNAME_LABEL)).toBeInTheDocument();
+    expect(screen.getByLabelText(PASSWORD_LABEL)).toBeInTheDocument();
+
+    const createAccountBtn = screen.getByRole('button', { name: SUBMIT_BUTTON_LABEL });
     expect(createAccountBtn).toBeInTheDocument();
-    // The create account button will be disabled when form renders
+    // Create account button will be disabled when form renders
     expect(createAccountBtn).toBeDisabled();
   });
 
-  test('shows validation errors for invalid username field', async () => {
-    render(
-      <MemoryRouter>
-        <CreateNewAccount />
-      </MemoryRouter>
-    );
+  test('displays validation error for the username field if input is invalid', async () => {
+    const { USERNAME_LABEL } = setup();
 
-    // When both fields have values but do not satisfy any validation criteria
-    fireEvent.input(screen.getByLabelText(/username/i), {
+    fireEvent.input(screen.getByLabelText(USERNAME_LABEL), {
       target: {
-        value: 'test',
+        value: 'test', // Invalid username (too short)
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
+    // Wait for validation error to appear
     await waitFor(() => {
       expect(screen.getByText('Username must be at least 10 characters')).toBeInTheDocument();
     });
   });
 
-  test('shows validation errors for invalid password field', async () => {
-    render(
-      <MemoryRouter>
-        <CreateNewAccount />
-      </MemoryRouter>
-    );
+  test('displays validation errors for the password field when input is invalid', async () => {
+    const { PASSWORD_LABEL } = setup();
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
-        value: 'test',
+        value: 'test', // Invalid password (too short)
       },
     });
 
@@ -72,9 +61,9 @@ describe('Create Account component', () => {
     });
 
     // When password passes minimum character validation criteria but does not satisfy other validations
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
-        value: 'indexindexindexindexindex',
+        value: 'indexindexindexindexindex', // Invalid password (no number)
       },
     });
 
@@ -85,9 +74,9 @@ describe('Create Account component', () => {
     });
 
     // When password passes minimum character validation criteria but has strength score less than 2
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
-        value: 'aaaaaaaaaaaaaaaaaaaaaaaa1',
+        value: 'aaaaaaaaaaaaaaaaaaaaaaaa1', // Invalid password (weak password)
       },
     });
 
@@ -96,64 +85,63 @@ describe('Create Account component', () => {
     });
   });
 
-  test('displays equivalent strength keywords for strength score returned by validating password form field', async () => {
-    render(
-      <MemoryRouter>
-        <CreateNewAccount />
-      </MemoryRouter>
-    );
+  // Test password strength levels displayed based on input
+  test('displays the correct strength keywords for each password strength level', async () => {
+    const { PASSWORD_LABEL } = setup();
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    // Simulate weak password input
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
         value: 'test',
       },
     });
 
     const passwordStrengthKeyword = screen.getByTestId('password-strength');
+
     await waitFor(() => {
       expect(passwordStrengthKeyword).toHaveTextContent('Very Weak');
     });
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    // Simulate weak password input with a slight improvement
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
         value: 'test1',
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
       expect(passwordStrengthKeyword).toHaveTextContent('Weak');
     });
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    // Simulate medium strength password
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
         value: 'test1Tester',
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
       expect(passwordStrengthKeyword).toHaveTextContent('Medium');
     });
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    // Simulate strong password
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
         value: 'test1Tester12',
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
       expect(passwordStrengthKeyword).toHaveTextContent('Strong');
     });
 
-    fireEvent.input(screen.getByLabelText(/password/i), {
+    // Simulate very strong password
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
         value: 'test1Tester12Long',
       },
     });
 
-    // Use waitFor to handle the async nature of form validation
     await waitFor(() => {
       expect(passwordStrengthKeyword).toHaveTextContent('Very Strong');
     });
