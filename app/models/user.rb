@@ -10,14 +10,15 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true, length: { minimum: 10, maximum: 50 }
   validates :password, presence: true, length: { minimum: 20, maximum: 50 }
 
-  def self.validate_username(username)
-    return false unless username.length.between?(10, 50)
-    true
-  end
+  # Custom password validation for user class instance
+  validate :validate_password
 
-  def self.validate_password(password)
-    return false unless password.length.between?(20, 50)
-    return false unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
-    true
+  # An instance level method that Rails will run automatically
+  def validate_password
+    return if password.blank?
+
+    unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
+      errors.add(:password, 'must contain at least one letter and one number')
+    end
   end
 end
