@@ -25,6 +25,8 @@ gem 'bcrypt', '~> 3.1.7'
 
 gem 'jwt'
 
+gem 'dotenv-rails', groups: [:development, :test]
+
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem "turbo-rails", "1.4.0"
 

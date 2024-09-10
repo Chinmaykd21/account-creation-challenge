@@ -49,3 +49,7 @@ node_modules
 
 # Test coverage
 coverage/
+
+# Environment files
+.env
+.env.test
