@@ -14,12 +14,12 @@ type AccountFormSchema = {
   honeypot: string; // This field will be hidden from the user but present in dom.
 };
 
-const createAccount = async (formData: AccountFormSchema) => {
+const createAccount = async (username: string, password: string, honeypot: string) => {
   try {
     const response = await axios.post('/api/create-account', {
-      username: formData.username,
-      password: formData.password,
-      honeypot: formData.honeypot,
+      username,
+      password,
+      honeypot,
     });
     console.log('*** response', response);
   } catch (error) {
@@ -63,7 +63,8 @@ export function CreateNewAccount() {
       console.info('[info_log]: Bot detected');
       return;
     }
-    await createAccount(data);
+    const { username, password, honeypot } = data;
+    await createAccount(username, password, honeypot);
     setIsBot(false);
     setIsLoading(false);
   };
