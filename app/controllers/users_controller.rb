@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  include JwtHelper
   skip_before_action :verify_authenticity_token, only: [:create_account]
   
   def create_account
@@ -15,13 +16,13 @@ class UsersController < ApplicationController
     begin
       user = User.new(username: username, password: password)
       if user.save
-        # TODO: Create a token and return it to the client
-        render json: { message: 'User created successfully, redirecting', redirect_url: '/signup/account-selection' }, status: :ok
+        token = encode_token(create_token_for_user(user))
+        render json: { message: 'User created successfully, redirecting', redirect_url: '/signup/account-selection', token: token }, status: :ok
       else
         render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
       end
     rescue => e
-      render json: { error: `Unexpected error occurred: #{e.message}` }, status: :internal_server_error
+      render json: { error: "Unexpected error occurred: #{e.message}" }, status: :internal_server_error
     end
   end
 end
