@@ -21,7 +21,7 @@ const createAccount = async (formData: AccountFormSchema) => {
       password: formData.password,
       honeypot: formData.honeypot,
     });
-    console.log('*** response sent successfully', response);
+    console.log('*** response', response);
   } catch (error) {
     console.error('[submission_Error]: Error while sending data', error);
   }

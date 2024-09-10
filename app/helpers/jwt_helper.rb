@@ -1,6 +1,4 @@
 module JwtHelper
-
-  # TODO: Move secret key to the environment variable after its working
   SECRET_KEY = ENV["JWT_SECRET_KEY"]
 
   def encode_token(payload)
