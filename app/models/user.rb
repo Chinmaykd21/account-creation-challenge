@@ -1,3 +1,5 @@
+require 'zxcvbn'
+
 class User < ApplicationRecord
   # Note_To_Self: This is a Rail method that integrates bcrypt for password encryption.
   # It automatically provides methods like authenticate and ensures that psasword is hashed and store as
@@ -12,6 +14,7 @@ class User < ApplicationRecord
 
   # Custom password validation for user class instance
   validate :validate_password
+  validate :validate_password_strength
 
   # An instance level method that Rails will run automatically
   def validate_password
@@ -19,6 +22,16 @@ class User < ApplicationRecord
 
     unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
       errors.add(:password, 'must contain at least one letter and one number')
+    end
+  end
+
+  # Password strength validation using zxcvbn (score should be >= 2)
+  def validate_password_strength
+    return if password.blank?
+
+    strength = Zxcvbn.test(password)
+    if strength.score < 2
+      errors.add(:password, 'is too weak, please choose a stronger password')
     end
   end
 end
