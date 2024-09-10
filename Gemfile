@@ -23,6 +23,8 @@ gem 'zxcvbn', '0.1.9'
 
 gem 'bcrypt', '~> 3.1.7'
 
+gem 'jwt'
+
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem "turbo-rails", "1.4.0"
 
