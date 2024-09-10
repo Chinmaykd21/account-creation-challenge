@@ -9,12 +9,9 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true, length: { minimum: 10, maximum: 50 }
   validates :password, presence: true, length: { minimum: 20, maximum: 50 }
-  
-  # Custom validation for the password
-  validate :validate_password
 
   def self.validate_username(username)
-    return false if username.length < 10 || username.length > 50
+    return false unless username.length.between?(10, 50)
     true
   end
 
@@ -22,13 +19,5 @@ class User < ApplicationRecord
     return false unless password.length.between?(20, 50)
     return false unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
     true
-  end
-
-  def validate_password
-    return if password.blank?
-    
-    unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
-      errors.add(:password,'must contain at least one letter and one number')
-    end
   end
 end
