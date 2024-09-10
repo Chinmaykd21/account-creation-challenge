@@ -3,8 +3,8 @@ class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create_account]
   
   def create_account
-    username = params[:username]
-    password = params[:password]
+    # username = params[:username]
+    # password = params[:password]
     honeypot = params[:honeypot] || ''
 
     # Validate honeypot field (should be empty)
