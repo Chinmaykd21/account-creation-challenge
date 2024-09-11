@@ -7,11 +7,16 @@ import { Deposit } from './routes/signup/deposit/deposit.tsx';
 import { JointAccess } from './routes/signup/joint-access/joint-access.tsx';
 import { StockRestrictions } from './routes/signup/stock-restrictions/stock-restrictions.tsx';
 import { CreateNewAccount } from './routes/account/create-account.tsx';
+import { ProtectedRoutes } from './reusable-components/protected-routes.tsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: (
+      <ProtectedRoutes>
+        <Root />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/create-account',
@@ -19,23 +24,43 @@ const router = createBrowserRouter([
   },
   {
     path: '/signup/account-selection',
-    element: <AccountSelection />,
+    element: (
+      <ProtectedRoutes>
+        <AccountSelection />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/signup/create-user',
-    element: <CreateUser />,
+    element: (
+      <ProtectedRoutes>
+        <CreateUser />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/signup/joint-access',
-    element: <JointAccess />,
+    element: (
+      <ProtectedRoutes>
+        <JointAccess />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/signup/stock-restrictions',
-    element: <StockRestrictions />,
+    element: (
+      <ProtectedRoutes>
+        <StockRestrictions />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/signup/deposit',
-    element: <Deposit />,
+    element: (
+      <ProtectedRoutes>
+        <Deposit />
+      </ProtectedRoutes>
+    ),
   },
 ]);
 
