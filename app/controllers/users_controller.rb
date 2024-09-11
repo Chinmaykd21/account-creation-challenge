@@ -3,8 +3,8 @@ class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create_account]
   
   def create_account
-    # username = params[:username]
-    # password = params[:password]
+    username = params[:username]
+    password = params[:password]
     honeypot = params[:honeypot] || ''
 
     # Validate honeypot field (should be empty)
@@ -12,18 +12,17 @@ class UsersController < ApplicationController
       render json: { error: 'Bot detected. Submission will not be processed' }, status: :unprocessable_entity
       return
     end
-
-    render json: { messsage: 'Creating new user' }, status: :ok
-    # begin
-    #   user = User.new(username: username, password: password)
-    #   if user.save
-    #     token = encode_token(create_token_for_user(user))
-    #     render json: { message: 'User created successfully, redirecting', redirect_url: '/signup/account-selection', token: token }, status: :ok
-    #   else
-    #     render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
-    #   end
-    # rescue => e
-    #   render json: { error: "Unexpected error occurred: #{e.message}" }, status: :internal_server_error
-    # end
+    
+    begin
+      user = User.new(username: username, password: password)
+      if user.save
+        token = encode_token(create_token_for_user(user))
+        render json: { message: 'User created successfully, redirecting', token: token }, status: :ok
+      else
+        render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
+      end
+    rescue => e
+      render json: { error: "Unexpected error occurred: #{e.message}" }, status: :internal_server_error
+    end
   end
 end

@@ -7,4 +7,7 @@ Rails.application.routes.draw do
 
   # Create Account
   post '/api/create-account', to: 'users#create_account'
+
+  # Verify token
+  post '/api/verify-token', to: 'authentication#verify_token'
 end
