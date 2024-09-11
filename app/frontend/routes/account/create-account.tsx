@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import zxcvbn from 'zxcvbn'; // Password strength library
 import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 type AccountFormSchema = {
@@ -35,9 +35,15 @@ const createAccount = async (username: string, password: string, honeypot: strin
     } else {
       return { error: error || '[account_creation_error]: Account creation failed' };
     }
-  } catch (error) {
-    console.error('[submission_Error]: Error while sending data', error);
-    return { error: 'Unknown error occurred' };
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      const errorMessage = error?.response?.data || error.message;
+      console.error('[submission_error]: Axios submission error', errorMessage);
+      return { error: errorMessage };
+    } else {
+      console.error('[submission_error]: unknown error', error);
+      return { error: 'Unknown error occurred' };
+    }
   }
 };
 

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import React, { FC, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
@@ -20,6 +21,16 @@ export const ProtectedRoutes: FC<ProtectedRoutesProps> = ({ children }) => {
         return;
       }
 
+      const decodedToken: { exp?: number } = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Convert time in seconds
+
+      if (!decodedToken.exp || decodedToken.exp < currentTime) {
+        console.error('[verification_failure]: Token expired or missing exp claim');
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await axios.post<{ valid: boolean; error?: string }>('/api/verify-token', null, {
           headers: {
@@ -28,7 +39,7 @@ export const ProtectedRoutes: FC<ProtectedRoutesProps> = ({ children }) => {
         });
         setIsAuthenticated(response.data.valid);
       } catch (error) {
-        console.error('[authorization_failure]: Token verification failed', error);
+        console.error('[verification_failure]: Token verification failed', error);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
