@@ -8,6 +8,8 @@ import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
 import axios, { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from 'app/frontend/reusable-components/spinner/spinner';
+import { twMerge } from 'tailwind-merge';
 
 type AccountFormSchema = {
   username: string;
@@ -50,7 +52,7 @@ const createAccount = async (username: string, password: string, honeypot: strin
 export function CreateNewAccount() {
   const navigate = useNavigate();
   const [isBot, setIsBot] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(true);
 
   const {
     register,
@@ -111,6 +113,7 @@ export function CreateNewAccount() {
             <input
               type="text"
               id="username"
+              disabled={pending}
               {...register('username', {
                 required: 'Username is required',
                 minLength: { value: 10, message: 'Username must be at least 10 characters' },
@@ -128,6 +131,7 @@ export function CreateNewAccount() {
             <input
               type="password"
               id="password"
+              disabled={pending}
               {...register('password', {
                 required: 'Password is required',
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
@@ -157,13 +161,21 @@ export function CreateNewAccount() {
 
             {/* Allow users to create account only if form is dirty AND valid */}
             <Button
-              customClassNames={`w-full text-center rounded-xl ${
+              classNames={twMerge(
+                'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
                 pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
-              } disabled:opacity-50`}
+              )}
               type="submit"
               isDisabled={!isDirty || !isValid || pending}
             >
-              {pending ? 'Creating Account...' : 'Create Account'}
+              {pending ? (
+                <div className="flex items-center gap-2 ">
+                  <Spinner />
+                  <span>Creating Account...</span>
+                </div>
+              ) : (
+                'Create Account'
+              )}
             </Button>
           </form>
         </div>
