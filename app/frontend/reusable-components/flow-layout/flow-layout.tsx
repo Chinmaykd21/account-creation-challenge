@@ -56,7 +56,7 @@ export function FlowLayout({ children }: Props) {
     <div className="h-full mt-5 max-w-[1000px] mx-auto">
       <div className="w-full text-right">
         {isAuthenticated && (
-          <Button customClassNames="mb-4 rounded-full" onClick={logout}>
+          <Button classNames="mb-4 rounded-full" onClick={logout}>
             Logout
           </Button>
         )}

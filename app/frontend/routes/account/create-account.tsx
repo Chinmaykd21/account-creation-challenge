@@ -52,7 +52,7 @@ const createAccount = async (username: string, password: string, honeypot: strin
 export function CreateNewAccount() {
   const navigate = useNavigate();
   const [isBot, setIsBot] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(true);
+  const [pending, setPending] = useState<boolean>(false);
 
   const {
     register,
@@ -93,7 +93,6 @@ export function CreateNewAccount() {
     } else {
       console.error('Error: ', error);
     }
-    // TODO: I think this is not required
     setIsBot(false);
     setPending(false);
   };
@@ -174,7 +173,7 @@ export function CreateNewAccount() {
                   <span>Creating Account...</span>
                 </div>
               ) : (
-                'Create Account'
+                <span>Create Account</span>
               )}
             </Button>
           </form>
