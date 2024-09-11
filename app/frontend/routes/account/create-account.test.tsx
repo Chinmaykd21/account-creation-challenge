@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { CreateNewAccount } from './create-account';
 import { MemoryRouter } from 'react-router-dom';
@@ -176,21 +176,22 @@ describe('Create Account component', () => {
     expect(createAccountBtn).toBeDisabled();
 
     // Use act to simulate user input (synchronous updates)
-    await act(async () => {
-      fireEvent.input(screen.getByLabelText(USERNAME_LABEL), {
-        target: {
-          value: 'validUsername123',
-        },
-      });
+    // await act(async () => {
 
-      fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
-        target: {
-          value: 'validPassword123456789012',
-        },
-      });
-
-      fireEvent.submit(createAccountBtn);
+    // });
+    fireEvent.input(screen.getByLabelText(USERNAME_LABEL), {
+      target: {
+        value: 'validUsername123',
+      },
     });
+
+    fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
+      target: {
+        value: 'validPassword123456789012',
+      },
+    });
+
+    fireEvent.submit(createAccountBtn);
 
     // Wait for axios post to be called and token to be set
     await waitFor(() => {
