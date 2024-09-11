@@ -17,7 +17,7 @@ class UsersController < ApplicationController
       user = User.new(username: username, password: password)
       if user.save
         token = encode_token(create_token_for_user(user))
-        render json: { message: 'User created successfully, redirecting', token: token }, status: :ok
+        render json: { token: token }, status: :ok
       else
         render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
       end

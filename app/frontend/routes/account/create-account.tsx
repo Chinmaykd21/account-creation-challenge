@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import zxcvbn from 'zxcvbn'; // Password strength library
 import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from 'app/frontend/reusable-components/spinner';
 import { twMerge } from 'tailwind-merge';
@@ -19,7 +19,6 @@ type AccountFormSchema = {
 
 type createAccountResponse = {
   token?: string;
-  message?: string;
   error?: string;
 };
 
@@ -38,8 +37,8 @@ const createAccount = async (username: string, password: string, honeypot: strin
       return { error: error || '[account_creation_error]: Account creation failed' };
     }
   } catch (error: unknown) {
-    if (error instanceof AxiosError) {
-      const errorMessage = error?.response?.data || error.message;
+    if (axios.isAxiosError(error)) {
+      const errorMessage = (error.response?.data as { error: string })?.error || error.message;
       console.error('[submission_error]: Axios submission error', errorMessage);
       return { error: errorMessage };
     } else {
@@ -53,6 +52,7 @@ export function CreateNewAccount() {
   const navigate = useNavigate();
   const [isBot, setIsBot] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
+  const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
 
   const {
     register,
@@ -91,7 +91,7 @@ export function CreateNewAccount() {
     if (token) {
       navigate('/signup/account-selection');
     } else {
-      console.error('Error: ', error);
+      setSubmissionError(error);
     }
     setIsBot(false);
     setPending(false);
@@ -136,7 +136,8 @@ export function CreateNewAccount() {
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
                 maxLength: { value: 50, message: 'Password must be at most 50 characters' },
                 validate: {
-                  passwordStrengthScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
+                  passwordStrengthScore: (value: string) =>
+                    zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
                 },
                 pattern: {
                   value: /^(?=.*[a-zA-Z])(?=.*[1-9]).*$/,
@@ -155,7 +156,11 @@ export function CreateNewAccount() {
 
             {/* Bot error message with reserved space to avoid layout shift. */}
             <div className="min-h-[10px]" id="honeypot-error">
-              {isBot && <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />}
+              {isBot ? (
+                <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />
+              ) : submissionError ? (
+                <FormError message={submissionError} isBot={false} />
+              ) : null}
             </div>
 
             {/* Allow users to create account only if form is dirty AND valid */}
