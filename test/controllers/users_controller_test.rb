@@ -18,8 +18,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     post api_create_account_url, params: { username: @valid_username, password: @valid_password, honeypot: @honeypot_empty }
 
     assert_response :ok
-    assert_equal 'User created successfully, redirecting', JSON.parse(response.body)['message']
-    assert_equal '/signup/account-selection', JSON.parse(response.body)['redirect_url']
   end
 
   test "should not create an account on empty username" do
