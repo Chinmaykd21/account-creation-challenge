@@ -7,6 +7,7 @@ import zxcvbn from 'zxcvbn'; // Password strength library
 import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 type AccountFormSchema = {
   username: string;
@@ -14,22 +15,35 @@ type AccountFormSchema = {
   honeypot: string; // This field will be hidden from the user but present in dom.
 };
 
-const createAccount = async (username: string, password: string, honeypot: string) => {
+type createAccountResponse = {
+  token?: string;
+  message?: string;
+  error?: string;
+};
+
+const createAccount = async (username: string, password: string, honeypot: string): Promise<createAccountResponse> => {
   try {
-    const response = await axios.post('/api/create-account', {
+    const response = await axios.post<createAccountResponse>('/api/create-account', {
       username,
       password,
       honeypot,
     });
-    console.log('*** response', response);
+    const { token, error } = response.data;
+    if (token) {
+      localStorage.setItem('token', token);
+      return { token };
+    } else {
+      return { error: error || '[account_creation_error]: Account creation failed' };
+    }
   } catch (error) {
     console.error('[submission_Error]: Error while sending data', error);
+    return { error: 'Unknown error occurred' };
   }
 };
 
 export function CreateNewAccount() {
+  const navigate = useNavigate();
   const [isBot, setIsBot] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     register,
@@ -54,19 +68,21 @@ export function CreateNewAccount() {
   const honeypotValue = watch('honeypot');
 
   const onSubmit: SubmitHandler<AccountFormSchema> = async (data) => {
-    setIsLoading(true);
     if (honeypotValue) {
       // Bot submission detected, do not submit form values to the server
       setIsBot(true);
-      setIsLoading(false);
       // Simulate sending metric to some kind of data collection tool, for example, datadog
       console.info('[info_log]: Bot detected');
       return;
     }
     const { username, password, honeypot } = data;
-    await createAccount(username, password, honeypot);
+    const { error, token } = await createAccount(username, password, honeypot);
+    if (token) {
+      navigate('/signup/account-selection');
+    } else {
+      console.error('Error: ', error);
+    }
     setIsBot(false);
-    setIsLoading(false);
   };
 
   return (
@@ -133,7 +149,7 @@ export function CreateNewAccount() {
             <Button
               customClassNames="w-full text-center rounded-xl hover:bg-[hsla(244,49%,39%,1)] disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
-              isDisabled={!isDirty || !isValid || isLoading}
+              isDisabled={!isDirty || !isValid}
             >
               Create Account
             </Button>
