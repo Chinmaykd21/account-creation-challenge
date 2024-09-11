@@ -10,41 +10,6 @@ interface Props {
 export function FlowLayout({ children }: Props) {
   const navigate = useNavigate();
   const { isAuthenticated, setIsAuthenticated } = useTokenVerification();
-  // const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  // useEffect(() => {
-  //   const checkAuthentication = async () => {
-  //     const token = localStorage.getItem('token');
-  //     if (!token) {
-  //       setIsAuthenticated(false);
-  //       return;
-  //     }
-
-  //     const decodedToken: { exp?: number } = jwtDecode(token);
-  //     const currentTime = Date.now() / 1000; // Convert time in seconds
-
-  //     if (!decodedToken.exp || decodedToken.exp < currentTime) {
-  //       console.error('[verification_failure]: Token expired or missing exp claim');
-  //       setIsAuthenticated(false);
-  //       return;
-  //     }
-
-  //     try {
-  //       const response = await axios.post<{ valid: boolean; error?: string }>('/api/verify-token', null, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       setIsAuthenticated(response.data.valid);
-  //     } catch (error) {
-  //       console.error('[verification_error]: Token verification failed', error);
-  //       setIsAuthenticated(false);
-  //     }
-  //   };
-
-  //   checkAuthentication();
-  // }, []);
 
   const logout = () => {
     localStorage.removeItem('token');
