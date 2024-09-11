@@ -38,6 +38,8 @@ export const useTokenVerification = (): {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        // Expected response from server is either { valid: true, error: "" } OR { valid: false, error: <error message> }
         setIsAuthenticated(response.data.valid);
       } catch (error) {
         console.error('[token_verification_error]: Token verification failed', error);
