@@ -50,6 +50,7 @@ const createAccount = async (username: string, password: string, honeypot: strin
 export function CreateNewAccount() {
   const navigate = useNavigate();
   const [isBot, setIsBot] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(false);
 
   const {
     register,
@@ -74,9 +75,11 @@ export function CreateNewAccount() {
   const honeypotValue = watch('honeypot');
 
   const onSubmit: SubmitHandler<AccountFormSchema> = async (data) => {
+    setPending(true);
     if (honeypotValue) {
       // Bot submission detected, do not submit form values to the server
       setIsBot(true);
+      setPending(false);
       // Simulate sending metric to some kind of data collection tool, for example, datadog
       console.info('[info_log]: Bot detected');
       return;
@@ -88,7 +91,9 @@ export function CreateNewAccount() {
     } else {
       console.error('Error: ', error);
     }
+    // TODO: I think this is not required
     setIsBot(false);
+    setPending(false);
   };
 
   return (
@@ -151,13 +156,14 @@ export function CreateNewAccount() {
             </div>
 
             {/* Allow users to create account only if form is dirty AND valid */}
-            {/* TODO: Style for isLoading state */}
             <Button
-              customClassNames="w-full text-center rounded-xl hover:bg-[hsla(244,49%,39%,1)] disabled:opacity-50 disabled:cursor-not-allowed"
+              customClassNames={`w-full text-center rounded-xl ${
+                pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
+              } disabled:opacity-50`}
               type="submit"
-              isDisabled={!isDirty || !isValid}
+              isDisabled={!isDirty || !isValid || pending}
             >
-              Create Account
+              {pending ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
         </div>
