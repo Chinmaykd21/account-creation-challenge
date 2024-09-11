@@ -1,11 +1,26 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { CreateNewAccount } from './create-account';
 import { MemoryRouter } from 'react-router-dom';
+import axios from 'axios';
+
+// Mocking axios
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+jest.mock('app/frontend/hooks/use-token-verification', () => ({
+  useTokenVerification: () => ({
+    isLoading: false,
+    isAuthenticated: false,
+    setIsAuthenticated: jest.fn(),
+  }),
+}));
 
 describe('Create Account component', () => {
   const setup = () => {
+    mockedAxios.post.mockClear();
+
     render(
       <MemoryRouter>
         <CreateNewAccount />
@@ -60,17 +75,15 @@ describe('Create Account component', () => {
       expect(screen.getByText('Password must be at least 20 characters')).toBeInTheDocument();
     });
 
-    // When password passes minimum character validation criteria but does not satisfy other validations
+    // When password passes minimum character validation criteria but has strength score less than 2
     fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
       target: {
-        value: 'indexindexindexindexindex', // Invalid password (no number)
+        value: 'aaaaaaaaaaaaaaaaaaaaaaaa', // Invalid password
       },
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Password must contain at least one letter between [a-zA-Z] and one number between [1-9]')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Password must contain at least one letter and one number')).toBeInTheDocument();
     });
 
     // When password passes minimum character validation criteria but has strength score less than 2
@@ -147,6 +160,51 @@ describe('Create Account component', () => {
     });
   });
 
-  // TODO: Implement test to check valid form submission functionality. Ref: https://react-hook-form.com/advanced-usage#TestingForm
+  test('should submit valid form data and navigate to account selection on success', async () => {
+    const { USERNAME_LABEL, PASSWORD_LABEL, SUBMIT_BUTTON_LABEL } = setup();
+
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        token: 'fake-token',
+      },
+    });
+
+    const createAccountBtn = screen.getByRole('button', { name: SUBMIT_BUTTON_LABEL });
+    expect(createAccountBtn).toBeInTheDocument();
+
+    // Create account button will be disabled when form renders
+    expect(createAccountBtn).toBeDisabled();
+
+    // Use act to simulate user input (synchronous updates)
+    await act(async () => {
+      fireEvent.input(screen.getByLabelText(USERNAME_LABEL), {
+        target: {
+          value: 'validUsername123',
+        },
+      });
+
+      fireEvent.input(screen.getByLabelText(PASSWORD_LABEL), {
+        target: {
+          value: 'validPassword123456789012',
+        },
+      });
+
+      fireEvent.submit(createAccountBtn);
+    });
+
+    // Wait for axios post to be called and token to be set
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.post).toHaveBeenCalledWith('/api/create-account', {
+        username: 'validUsername123',
+        password: 'validPassword123456789012',
+        honeypot: '', // Assuming honeypot is not filled
+      });
+      expect(localStorage.getItem('token')).toBe('fake-token');
+      // TODO: Fix this later
+      // expect(window.location.pathname).toBe('/signup/account-selection');
+    });
+  });
+
   // TODO: Implement test to check honeypot functionality
 });

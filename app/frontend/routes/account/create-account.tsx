@@ -60,6 +60,7 @@ export function CreateNewAccount() {
     setFocus,
     formState: { errors, isDirty, isValid },
     handleSubmit,
+    reset,
   } = useForm<AccountFormSchema>({
     mode: 'all', // Track changes as soon as inputs are modified
     defaultValues: {
@@ -84,9 +85,11 @@ export function CreateNewAccount() {
       setPending(false);
       // Simulate sending metric to some kind of data collection tool, for example, datadog
       console.info('[info_log]: Bot detected');
+      reset();
       return;
     }
     const { username, password, honeypot } = data;
+
     const { error, token } = await createAccount(username, password, honeypot);
     if (token) {
       navigate('/signup/account-selection');
@@ -95,6 +98,7 @@ export function CreateNewAccount() {
     }
     setIsBot(false);
     setPending(false);
+    reset();
   };
 
   return (
@@ -136,8 +140,7 @@ export function CreateNewAccount() {
                 minLength: { value: 20, message: 'Password must be at least 20 characters' },
                 maxLength: { value: 50, message: 'Password must be at most 50 characters' },
                 validate: {
-                  passwordStrengthScore: (value: string) =>
-                    zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
+                  passwordStrengthScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
                 },
                 pattern: {
                   value: /^(?=.*[a-zA-Z])(?=.*[1-9]).*$/,
