@@ -12,7 +12,7 @@ import { useFormSubmission } from 'app/frontend/hooks/use-form-submission';
 
 const validateAccountForm = (
   formState: { username: string; password: string },
-  passwordStrength: number
+  passwordStrength?: number
 ): FormErrors<typeof formState> => {
   const errors: FormErrors<typeof formState> = {};
 
@@ -28,7 +28,7 @@ const validateAccountForm = (
     errors.password = 'Password must be between 20 and 50 characters';
   } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
     errors.password = 'Password must contain at least one letter and one number.';
-  } else if (passwordStrength < 2) {
+  } else if (passwordStrength && passwordStrength < 2) {
     errors.password = 'Password strength must be at least 2 (medium).';
   }
 

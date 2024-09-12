@@ -6,7 +6,7 @@ export type FormErrors<T> = Partial<Record<keyof T, string>>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useFormState = <T extends Record<string, any>>(
   initialState: T,
-  validateFn: (formState: T, passwordStrength: number) => FormErrors<T>
+  validateFn: (formState: T, passwordStrength?: number) => FormErrors<T>
 ) => {
   const [formState, setFormState] = useState<T>(initialState);
   const [errors, setErrors] = useState<FormErrors<T>>({});
