@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 
@@ -33,14 +33,23 @@ export const useTokenVerification = (): {
 
       // Verify token on the server
       try {
-        const response = await axios.post<{ valid: boolean; error?: string }>('/api/verify-token', null, {
+        const response = await fetch('/api/verify-token', {
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json', // Ensure the content type is JSON
           },
         });
 
+        const data = await response.json(); // Parse the JSON response
+
         // Expected response from server is either { valid: true, error: "" } OR { valid: false, error: <error message> }
-        setIsAuthenticated(response.data.valid);
+        if (response.ok) {
+          setIsAuthenticated(data.valid);
+        } else {
+          console.error('[token_verification_error]:', data.error);
+          setIsAuthenticated(false);
+        }
       } catch (error) {
         console.error('[token_verification_error]: Token verification failed', error);
         setIsAuthenticated(false);
