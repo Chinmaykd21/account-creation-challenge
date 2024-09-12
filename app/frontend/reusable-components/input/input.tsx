@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
 
 interface Props {
   type: string;
@@ -13,6 +12,7 @@ interface Props {
 export function Input({ onChange, label, name, type, className, disabled = false }: Props) {
   const [value, setValue] = useState('');
   const id = label.replace(/ /gm, '_');
+  const defaultClassName = 'block w-full p-2 border-4 border-solid border-slate-300';
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setValue(event.target.value);
     onChange?.(event.target.value);
@@ -27,7 +27,7 @@ export function Input({ onChange, label, name, type, className, disabled = false
         name={name}
         type={type}
         disabled={disabled}
-        className={twMerge('block w-full p-2 border-4 border-solid border-slate-300', className)}
+        className={className ? className : defaultClassName}
         value={value}
         onChange={handleChange}
       />

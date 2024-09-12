@@ -13,7 +13,7 @@ import { Card } from 'app/frontend/reusable-components/card/card';
 interface AccountFormSchema {
   username: string;
   password: string;
-  honeypot: string; // Bot detection field
+  funFact: string; // Bot detection field
 }
 
 // Define possible error states for the form
@@ -26,7 +26,7 @@ export function CreateAccout() {
   const [formState, setFormState] = useState<AccountFormSchema>({
     username: '',
     password: '',
-    honeypot: '', // Bot detection field
+    funFact: '', // Bot detection field
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -77,7 +77,7 @@ export function CreateAccout() {
       return;
     }
 
-    if (formState.honeypot) {
+    if (formState.funFact) {
       setIsBot(true);
       return;
     }
@@ -108,73 +108,78 @@ export function CreateAccout() {
   return (
     <FlowLayout>
       <Card title="Create New Account" showWealthFrontLogo={true}>
-        <div className="space-y-2">
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Hidden honeypot input for bot detection */}
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          {/* Hidden funFact input for bot detection */}
+          <div className="hidden">
+            <label htmlFor="funFact">Honeypot</label>
             <input
               type="text"
-              name="honeypot"
-              value={formState.honeypot}
-              onChange={(e) => handleChange('honeypot', e.target.value)}
-              className="hidden"
+              name="funFact"
+              value={formState.funFact}
+              onChange={(e) => handleChange('funFact', e.target.value)}
             />
+          </div>
 
-            {/* Username input using Input component */}
-            <div className="form-group">
-              <Input
-                type="text"
-                name="username"
-                label="Username"
-                className=""
-                disabled={pending}
-                onChange={(value) => handleChange('username', value)}
-              />
-              {errors.username && <p className="error">{errors.username}</p>}
+          {/* Username input using Input component */}
+          <div className="form-group">
+            <Input
+              type="text"
+              name="username"
+              label="Username"
+              disabled={pending}
+              onChange={(value) => handleChange('username', value)}
+              className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
+            />
+            {/* Error message for username */}
+            <div className="min-h-[10px]" id="username-error">
+              {errors.username && <FormError message={errors.username} />}
             </div>
+          </div>
 
-            {/* Password input using Input component */}
-            <div className="form-group">
-              <Input
-                type="password"
-                name="password"
-                label="Password"
-                className=""
-                disabled={pending}
-                onChange={(value) => handleChange('password', value)}
-              />
-              {errors.password && <p className="error">{errors.password}</p>}
-
-              {/* Password strength meter */}
-              <PasswordStrengthMeter passwordValue={formState.password} />
+          {/* Password input using Input component */}
+          <div className="form-group">
+            <Input
+              type="password"
+              name="password"
+              label="Password"
+              className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
+              disabled={pending}
+              onChange={(value) => handleChange('password', value)}
+            />
+            {/* Error message for password */}
+            <div className="min-h-[10px]" id="password-error">
+              {errors.password && <FormError message={errors.password} />}
             </div>
+          </div>
 
-            <div className="min-h-[10px]" id="honeypot-error">
-              {isBot ? (
-                <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />
-              ) : submissionError ? (
-                <FormError message={submissionError} isBot={false} />
-              ) : null}
-            </div>
+          <PasswordStrengthMeter passwordValue={formState.password} />
 
-            <Button
-              classNames={twMerge(
-                'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
-                pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
-              )}
-              type="submit"
-              isDisabled={pending}
-            >
-              {pending ? (
-                <div className="flex items-center gap-2 ">
-                  <Spinner />
-                  <span>Creating Account...</span>
-                </div>
-              ) : (
-                <span>Create Account</span>
-              )}
-            </Button>
-          </form>
-        </div>
+          <div className="min-h-[5px]" id="funFact-error">
+            {isBot ? (
+              <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />
+            ) : submissionError ? (
+              <FormError message={submissionError} isBot={false} />
+            ) : null}
+          </div>
+
+          <Button
+            classNames={twMerge(
+              'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
+              pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
+            )}
+            type="submit"
+            isDisabled={pending || passwordStrength < 2}
+          >
+            {pending ? (
+              <div className="flex items-center gap-2 ">
+                <Spinner />
+                <span>Creating Account...</span>
+              </div>
+            ) : (
+              <span>Create Account</span>
+            )}
+          </Button>
+        </form>
       </Card>
     </FlowLayout>
   );
