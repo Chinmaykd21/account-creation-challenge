@@ -10,7 +10,10 @@ import { Card } from 'app/frontend/reusable-components/card/card';
 import { FormErrors, useFormState } from 'app/frontend/hooks/use-form-state';
 import { useFormSubmission } from 'app/frontend/hooks/use-form-submission';
 
-const validateAccountForm = (formState: { username: string; password: string }): FormErrors<typeof formState> => {
+const validateAccountForm = (
+  formState: { username: string; password: string },
+  passwordStrength: number
+): FormErrors<typeof formState> => {
   const errors: FormErrors<typeof formState> = {};
 
   if (!formState.username.trim()) {
@@ -23,6 +26,10 @@ const validateAccountForm = (formState: { username: string; password: string }):
     errors.password = 'Password is required';
   } else if (formState.password.length < 20 || formState.password.length > 50) {
     errors.password = 'Password must be between 20 and 50 characters';
+  } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
+    errors.password = 'Password must contain at least one letter and one number.';
+  } else if (passwordStrength < 2) {
+    errors.password = 'Password strength must be at least 2 (medium).';
   }
 
   return errors;
