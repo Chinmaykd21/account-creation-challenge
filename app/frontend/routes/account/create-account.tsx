@@ -17,6 +17,7 @@ export function CreateNewAccount() {
 
   useEffect(() => {
     setIsValid(validate());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState, passwordStrength]);
 
   const onSubmit = (event: FormEvent) => {
