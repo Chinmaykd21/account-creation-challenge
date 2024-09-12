@@ -8,7 +8,7 @@ import { FormError } from '../../reusable-components/form/form-error';
 import { PasswordStrengthMeter } from './password-strength';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'app/frontend/reusable-components/spinner';
+import { Spinner } from 'app/frontend/reusable-components/spinner/spinner';
 import { twMerge } from 'tailwind-merge';
 
 type AccountFormSchema = {

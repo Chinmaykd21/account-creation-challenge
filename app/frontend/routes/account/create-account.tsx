@@ -1,7 +1,7 @@
 import React, { FC, FormEvent, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { PasswordStrengthMeter } from './password-strength';
-import { Spinner } from 'app/frontend/reusable-components/spinner';
+import { Spinner } from 'app/frontend/reusable-components/spinner/spinner';
 import { Button } from 'app/frontend/reusable-components/button/button';
 import { FormError } from 'app/frontend/reusable-components/form/form-error';
 import { Input } from 'app/frontend/reusable-components/input/input';

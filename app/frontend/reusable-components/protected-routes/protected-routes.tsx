@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useTokenVerification } from '../hooks/use-token-verification';
+import { useTokenVerification } from '../../hooks/use-token-verification';
 
 type ProtectedRoutesProps = {
   children: JSX.Element;
@@ -11,7 +11,7 @@ export const ProtectedRoutes: FC<ProtectedRoutesProps> = ({ children }) => {
   const { isLoading, isAuthenticated } = useTokenVerification();
 
   if (isLoading) {
-    return <div>Loading...(TODO: Some nice UI coming later)</div>;
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {

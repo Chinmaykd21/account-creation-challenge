@@ -6,9 +6,8 @@ import { CreateUser } from './routes/signup/create-user/create-user.tsx';
 import { Deposit } from './routes/signup/deposit/deposit.tsx';
 import { JointAccess } from './routes/signup/joint-access/joint-access.tsx';
 import { StockRestrictions } from './routes/signup/stock-restrictions/stock-restrictions.tsx';
-// import { CreateNewAccount } from './routes/account/create-account-with-react-hook-form.tsx';
 
-import { ProtectedRoutes } from './reusable-components/protected-routes.tsx';
+import { ProtectedRoutes } from './reusable-components/protected-routes/protected-routes.tsx';
 import { CreateNewAccount } from './routes/account/create-account.tsx';
 
 const router = createBrowserRouter([
