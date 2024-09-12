@@ -1,12 +1,12 @@
 import React, { ChangeEvent, useState } from 'react';
 
 interface Props {
-  type: string;
-  name: string;
+  type?: string;
+  name?: string;
   label: string;
   onChange?: (value: string) => void;
-  className: string;
-  disabled: boolean;
+  className?: string;
+  disabled?: boolean;
 }
 
 export function Input({ onChange, label, name, type, className, disabled = false }: Props) {
