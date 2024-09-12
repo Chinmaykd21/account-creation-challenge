@@ -9,7 +9,7 @@ import { StockRestrictions } from './routes/signup/stock-restrictions/stock-rest
 // import { CreateNewAccount } from './routes/account/create-account-with-react-hook-form.tsx';
 
 import { ProtectedRoutes } from './reusable-components/protected-routes.tsx';
-import { CreateAccout } from './routes/account/create-account.tsx';
+import { CreateNewAccount } from './routes/account/create-account.tsx';
 
 const router = createBrowserRouter([
   {
@@ -22,7 +22,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/create-account',
-    element: <CreateAccout />,
+    element: <CreateNewAccount />,
   },
   {
     path: '/signup/account-selection',

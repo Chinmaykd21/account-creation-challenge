@@ -22,7 +22,7 @@ interface FormErrors {
   password?: string;
 }
 
-export function CreateAccout() {
+export function CreateNewAccount() {
   const [formState, setFormState] = useState<AccountFormSchema>({
     username: '',
     password: '',
