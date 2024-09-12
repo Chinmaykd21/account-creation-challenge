@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AccountFormSchema } from './use-form-state';
 
-export const useFormSubmission = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useFormSubmission = <T extends Record<string, any>>(submitFn: (formState: T) => Promise<any>) => {
   const navigate = useNavigate();
   const [pending, setPending] = useState<boolean>(false);
   const [isBot, setIsBot] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
 
-  const handleSubmit = async (formState: AccountFormSchema) => {
+  const handleSubmit = async (formState: T) => {
     if (formState.funFact) {
       setIsBot(true);
       return;
@@ -17,21 +17,14 @@ export const useFormSubmission = () => {
     setPending(true);
 
     try {
-      const response = await fetch('/api/create-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formState),
-      });
-
-      const data = await response.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        navigate('/signup/account-selection');
-      } else {
-        setSubmissionError(data.error || '[account_creation_error]: Account creation failed');
-      }
+      await submitFn(formState);
+      navigate('/signup/account-selection');
     } catch (error) {
-      setSubmissionError('An unknown error occurred.');
+      if (error instanceof Error) {
+        setSubmissionError(error.message);
+      } else {
+        setSubmissionError('An unknown error occurred.');
+      }
     } finally {
       setPending(false);
     }

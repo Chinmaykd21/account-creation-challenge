@@ -51,7 +51,11 @@ export const useTokenVerification = (): {
           setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('[token_verification_error]: Token verification failed', error);
+        if (error) {
+          console.error('[token_verification_error]: Token verification failed', error);
+        } else {
+          console.error('An unknown error has occurred');
+        }
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

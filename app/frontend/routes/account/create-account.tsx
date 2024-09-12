@@ -7,12 +7,50 @@ import { FormError } from 'app/frontend/reusable-components/form/form-error';
 import { Input } from 'app/frontend/reusable-components/input/input';
 import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
 import { Card } from 'app/frontend/reusable-components/card/card';
-import { useFormState } from 'app/frontend/hooks/use-form-state';
+import { FormErrors, useFormState } from 'app/frontend/hooks/use-form-state';
 import { useFormSubmission } from 'app/frontend/hooks/use-form-submission';
 
+const validateAccountForm = (formState: { username: string; password: string }): FormErrors<typeof formState> => {
+  const errors: FormErrors<typeof formState> = {};
+
+  if (!formState.username.trim()) {
+    errors.username = 'Username is required';
+  } else if (formState.username.length < 10 || formState.username.length > 50) {
+    errors.username = 'Username must be between 10 and 50 characters';
+  }
+
+  if (!formState.password.trim()) {
+    errors.password = 'Password is required';
+  } else if (formState.password.length < 20 || formState.password.length > 50) {
+    errors.password = 'Password must be between 20 and 50 characters';
+  }
+
+  return errors;
+};
+
+const submitAccountForm = async (formState: { username: string; password: string }) => {
+  const response = await fetch('/api/create-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formState),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || '[account_creation_error]: Account creation failed');
+  } else {
+    localStorage.setItem('token', data.token);
+  }
+};
+
 export function CreateNewAccount() {
-  const { formState, errors, handleChange, passwordStrength, touchedFields, validate } = useFormState();
-  const { isBot, pending, submissionError, handleSubmit } = useFormSubmission();
+  const initialFormState = { username: '', password: '', funFact: '' };
+  const { formState, errors, handleChange, passwordStrength, validate, touchedFields } = useFormState(
+    initialFormState,
+    validateAccountForm
+  );
+
+  const { handleSubmit, pending, isBot, submissionError } = useFormSubmission(submitAccountForm);
   const [isValid, setIsValid] = useState<boolean>(false);
 
   useEffect(() => {

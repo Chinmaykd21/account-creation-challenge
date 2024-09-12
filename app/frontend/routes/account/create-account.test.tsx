@@ -42,8 +42,8 @@ describe('CreateNewAccount Component', () => {
 
     // Wait for validation errors to appear
     await waitFor(() => {
-      expect(screen.getByText(/Username must be between 10 and 50 characters./)).toBeInTheDocument();
-      expect(screen.getByText(/Password must be between 20 and 50 characters./)).toBeInTheDocument();
+      expect(screen.getByText(/Username must be between 10 and 50 characters/)).toBeInTheDocument();
+      expect(screen.getByText(/Password must be between 20 and 50 characters/)).toBeInTheDocument();
     });
   });
 

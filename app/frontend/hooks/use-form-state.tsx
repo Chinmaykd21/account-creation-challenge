@@ -1,30 +1,19 @@
 import { useState } from 'react';
 import zxcvbn from 'zxcvbn';
 
-export type AccountFormSchema = {
-  username: string;
-  password: string;
-  funFact: string; // Bot detection field
-};
+export type FormErrors<T> = Partial<Record<keyof T, string>>;
 
-type FormErrors = Partial<Pick<AccountFormSchema, 'username' | 'password'>>;
-
-export const useFormState = () => {
-  const [formState, setFormState] = useState<AccountFormSchema>({
-    username: '',
-    password: '',
-    funFact: '',
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useFormState = <T extends Record<string, any>>(
+  initialState: T,
+  validateFn: (formState: T) => FormErrors<T>
+) => {
+  const [formState, setFormState] = useState<T>(initialState);
+  const [errors, setErrors] = useState<FormErrors<T>>({});
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
-  const [touchedFields, setTouchedFields] = useState<{ [key in keyof AccountFormSchema]?: boolean }>({
-    username: false,
-    password: false,
-  });
+  const [touchedFields, setTouchedFields] = useState<Partial<Record<keyof T, boolean>>>({});
 
-  // Handle input changes and update form state
-  const handleChange = (name: keyof AccountFormSchema, value: string) => {
+  const handleChange = (name: keyof T, value: string) => {
     setFormState((prevState) => ({
       ...prevState,
       [name]: value,
@@ -35,37 +24,16 @@ export const useFormState = () => {
       [name]: true,
     }));
 
-    // Check password strength when the password field changes
+    // If the form has a password field, check password strength
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
     }
   };
 
-  // Validate form inputs
+  // Validate form inputs using custom validation function
   const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (touchedFields.username) {
-      if (!formState.username.trim()) {
-        newErrors.username = 'Username is required';
-      } else if (formState.username.length < 10 || formState.username.length > 50) {
-        newErrors.username = 'Username must be between 10 and 50 characters.';
-      }
-    }
-
-    if (touchedFields.password) {
-      if (!formState.password.trim()) {
-        newErrors.password = 'Password is required';
-      } else if (formState.password.length < 20 || formState.password.length > 50) {
-        newErrors.password = 'Password must be between 20 and 50 characters.';
-      } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
-        newErrors.password = 'Password must contain at least one letter and one number.';
-      } else if (passwordStrength < 2) {
-        newErrors.password = 'Password strength must be at least 2 (medium).';
-      }
-    }
-
+    const newErrors = validateFn(formState);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
