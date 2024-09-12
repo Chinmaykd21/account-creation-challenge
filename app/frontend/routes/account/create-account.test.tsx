@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { CreateNewAccount } from './create-account';
+import { CreateNewAccount } from './create-account-with-react-hook-form';
 import { MemoryRouter } from 'react-router-dom';
 import axios from 'axios';
 

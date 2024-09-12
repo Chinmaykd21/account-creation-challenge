@@ -1,11 +1,16 @@
 import React, { ChangeEvent, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 interface Props {
+  type: string;
+  name: string;
   label: string;
   onChange?: (value: string) => void;
+  className: string;
+  disabled: boolean;
 }
 
-export function Input({ onChange, label }: Props) {
+export function Input({ onChange, label, name, type, className, disabled = false }: Props) {
   const [value, setValue] = useState('');
   const id = label.replace(/ /gm, '_');
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -19,7 +24,10 @@ export function Input({ onChange, label }: Props) {
       </label>
       <input
         id={id}
-        className="block w-full p-2 border-4 border-solid border-slate-300"
+        name={name}
+        type={type}
+        disabled={disabled}
+        className={twMerge('block w-full p-2 border-4 border-solid border-slate-300', className)}
         value={value}
         onChange={handleChange}
       />

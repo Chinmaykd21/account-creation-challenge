@@ -1,163 +1,153 @@
-import React, { useEffect, useState } from 'react';
-import { Card } from '../../reusable-components/card/card';
-import { Button } from '../../reusable-components/button/button';
-import { FlowLayout } from '../../reusable-components/flow-layout/flow-layout';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import zxcvbn from 'zxcvbn'; // Password strength library
-import { FormError } from '../../reusable-components/form/form-error';
-import { PasswordStrengthMeter } from './password-strength';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'app/frontend/reusable-components/spinner';
 import { twMerge } from 'tailwind-merge';
+import { PasswordStrengthMeter } from './password-strength';
+import { Spinner } from 'app/frontend/reusable-components/spinner';
+import { Button } from 'app/frontend/reusable-components/button/button';
+import { FormError } from 'app/frontend/reusable-components/form/form-error';
+import { Input } from 'app/frontend/reusable-components/input/input';
+import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
+import { Card } from 'app/frontend/reusable-components/card/card';
 
-type AccountFormSchema = {
+// Define the form state schema
+interface AccountFormSchema {
   username: string;
   password: string;
-  honeypot: string; // This field will be hidden from the user but present in dom.
-};
+  honeypot: string; // Bot detection field
+}
 
-type createAccountResponse = {
-  token?: string;
-  error?: string;
-};
+// Define possible error states for the form
+interface FormErrors {
+  username?: string;
+  password?: string;
+}
 
-const createAccount = async (username: string, password: string, honeypot: string): Promise<createAccountResponse> => {
-  try {
-    const response = await axios.post<createAccountResponse>('/api/create-account', {
-      username,
-      password,
-      honeypot,
-    });
-    const { token, error } = response.data;
-    if (token) {
-      localStorage.setItem('token', token);
-      return { token };
-    } else {
-      return { error: error || '[account_creation_error]: Account creation failed' };
-    }
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const errorMessage = (error.response?.data as { error: string })?.error || error.message;
-      console.error('[submission_error]: Axios submission error', errorMessage);
-      return { error: errorMessage };
-    } else {
-      console.error('[submission_error]: unknown error', error);
-      return { error: 'Unknown error occurred' };
-    }
-  }
-};
-
-export function CreateNewAccount() {
-  const navigate = useNavigate();
-  const [isBot, setIsBot] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(false);
-  const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
-
-  const {
-    register,
-    watch,
-    setFocus,
-    formState: { errors, isDirty, isValid },
-    handleSubmit,
-    reset,
-  } = useForm<AccountFormSchema>({
-    mode: 'all', // Track changes as soon as inputs are modified
-    defaultValues: {
-      username: '',
-      password: '',
-      honeypot: '',
-    },
+export function CreateAccout() {
+  const [formState, setFormState] = useState<AccountFormSchema>({
+    username: '',
+    password: '',
+    honeypot: '', // Bot detection field
   });
 
-  useEffect(() => {
-    setFocus('username');
-  }, [setFocus]);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const [pending, setPending] = useState<boolean>(false);
+  const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
+  const [isBot, setIsBot] = useState<boolean>(false);
 
-  const passwordValue = watch('password');
-  const honeypotValue = watch('honeypot');
+  // Handle input changes
+  const handleChange = (name: keyof AccountFormSchema, value: string) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
 
-  const onSubmit: SubmitHandler<AccountFormSchema> = async (data) => {
-    setPending(true);
-    if (honeypotValue) {
-      // Bot submission detected, do not submit form values to the server
-      setIsBot(true);
-      setPending(false);
-      // Simulate sending metric to some kind of data collection tool, for example, datadog
-      console.info('[info_log]: Bot detected');
-      reset();
+    // Check password strength when the password field changes
+    if (name === 'password') {
+      const strength = zxcvbn(value).score;
+      setPasswordStrength(strength);
+    }
+  };
+
+  // Validate the form inputs
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (formState.username.length < 10 || formState.username.length > 50) {
+      newErrors.username = 'Username must be between 10 and 50 characters.';
+    }
+
+    if (formState.password.length < 20 || formState.password.length > 50) {
+      newErrors.password = 'Password must be between 20 and 50 characters.';
+    } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
+      newErrors.password = 'Password must contain at least one letter and one number.';
+    } else if (passwordStrength < 2) {
+      newErrors.password = 'Password strength must be at least 2 (medium).';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!validate()) {
       return;
     }
-    const { username, password, honeypot } = data;
 
-    const { error, token } = await createAccount(username, password, honeypot);
-    if (token) {
-      navigate('/signup/account-selection');
-    } else {
-      setSubmissionError(error);
+    if (formState.honeypot) {
+      setIsBot(true);
+      return;
     }
-    setIsBot(false);
-    setPending(false);
-    reset();
+
+    setPending(true);
+
+    try {
+      const response = await fetch('/api/create-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState),
+      });
+
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/signup/account-selection';
+      } else {
+        setSubmissionError(data.error || '[account_creation_error]: Account creation failed');
+      }
+    } catch (error) {
+      setSubmissionError('An unknown error occurred.');
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <FlowLayout>
       <Card title="Create New Account" showWealthFrontLogo={true}>
         <div className="space-y-2">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-4">
-            {/* Honeypot hidden field for bot detection */}
-            <div className="hidden">
-              <label htmlFor="honeypot">Honeypot</label>
-              <input id="honeypot" type="text" {...register('honeypot')} />
-            </div>
-            {/* Username field */}
-            <label htmlFor="username">Username</label>
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Hidden honeypot input for bot detection */}
             <input
               type="text"
-              id="username"
-              disabled={pending}
-              {...register('username', {
-                required: 'Username is required',
-                minLength: { value: 10, message: 'Username must be at least 10 characters' },
-                maxLength: { value: 50, message: 'Username must be at most 50 characters' },
-              })}
-              className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
+              name="honeypot"
+              value={formState.honeypot}
+              onChange={(e) => handleChange('honeypot', e.target.value)}
+              className="hidden"
             />
-            {/* Error message for username */}
-            <div className="min-h-[10px]" id="username-error">
-              {errors.username?.message && <FormError message={errors.username.message} />}
+
+            {/* Username input using Input component */}
+            <div className="form-group">
+              <Input
+                type="text"
+                name="username"
+                label="Username"
+                className=""
+                disabled={pending}
+                onChange={(value) => handleChange('username', value)}
+              />
+              {errors.username && <p className="error">{errors.username}</p>}
             </div>
 
-            {/* Password field */}
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              disabled={pending}
-              {...register('password', {
-                required: 'Password is required',
-                minLength: { value: 20, message: 'Password must be at least 20 characters' },
-                maxLength: { value: 50, message: 'Password must be at most 50 characters' },
-                validate: {
-                  passwordStrengthScore: (value) => zxcvbn(value).score >= 2 || 'Password strength must be at least 2',
-                },
-                pattern: {
-                  value: /^(?=.*[a-zA-Z])(?=.*[1-9]).*$/,
-                  message: 'Password must contain at least one letter and one number',
-                },
-              })}
-              className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
-            />
-            {/* Error message for password */}
-            <div className="min-h-[10px]" id="password-error">
-              {errors.password?.message && <FormError message={errors.password.message} />}
+            {/* Password input using Input component */}
+            <div className="form-group">
+              <Input
+                type="password"
+                name="password"
+                label="Password"
+                className=""
+                disabled={pending}
+                onChange={(value) => handleChange('password', value)}
+              />
+              {errors.password && <p className="error">{errors.password}</p>}
+
+              {/* Password strength meter */}
+              <PasswordStrengthMeter passwordValue={formState.password} />
             </div>
 
-            {/* Password Strength Meter */}
-            <PasswordStrengthMeter passwordValue={passwordValue} />
-
-            {/* Bot error message with reserved space to avoid layout shift. */}
             <div className="min-h-[10px]" id="honeypot-error">
               {isBot ? (
                 <FormError message="Bot detected. Submission has been blocked." isBot={isBot} />
@@ -166,14 +156,13 @@ export function CreateNewAccount() {
               ) : null}
             </div>
 
-            {/* Allow users to create account only if form is dirty AND valid */}
             <Button
               classNames={twMerge(
                 'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
                 pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
               )}
               type="submit"
-              isDisabled={!isDirty || !isValid || pending}
+              isDisabled={pending}
             >
               {pending ? (
                 <div className="flex items-center gap-2 ">
