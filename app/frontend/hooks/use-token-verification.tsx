@@ -20,7 +20,7 @@ export const useTokenVerification = (): {
         return;
       }
 
-      // Verify if token is not expired
+      // Verify if token has not expired
       const decodedToken: { exp?: number } = jwtDecode(token);
       const currentTime = Date.now() / 1000; // Time in seconds
 
@@ -37,17 +37,20 @@ export const useTokenVerification = (): {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json', // Ensure the content type is JSON
+            'Content-Type': 'application/json',
           },
         });
 
-        const data = await response.json(); // Parse the JSON response
-
         // Expected response from server is either { valid: true, error: "" } OR { valid: false, error: <error message> }
+        const data: { valid: boolean; error?: string } = await response.json();
         if (response.ok) {
           setIsAuthenticated(data.valid);
         } else {
-          console.error('[token_verification_error]:', data.error);
+          if (data.error) {
+            console.error('[token_verification_error]:', data.error);
+          } else {
+            console.error('An unknown error has occurred');
+          }
           setIsAuthenticated(false);
         }
       } catch (error) {
