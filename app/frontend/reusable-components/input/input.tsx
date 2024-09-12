@@ -7,9 +7,10 @@ interface Props {
   onChange?: (value: string) => void;
   className?: string;
   disabled?: boolean;
+  required?: boolean;
 }
 
-export function Input({ onChange, label, name, type, className, disabled = false }: Props) {
+export function Input({ onChange, label, name, type, className, disabled = false, required }: Props) {
   const [value, setValue] = useState('');
   const id = label.replace(/ /gm, '_');
   const defaultClassName = 'block w-full p-2 border-4 border-solid border-slate-300';
@@ -30,6 +31,7 @@ export function Input({ onChange, label, name, type, className, disabled = false
         className={className ? className : defaultClassName}
         value={value}
         onChange={handleChange}
+        required={required}
       />
     </div>
   );

@@ -46,12 +46,18 @@ export const useFormState = () => {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (touchedFields.username && (formState.username.length < 10 || formState.username.length > 50)) {
-      newErrors.username = 'Username must be between 10 and 50 characters.';
+    if (touchedFields.username) {
+      if (!formState.username.trim()) {
+        newErrors.username = 'Username is required';
+      } else if (formState.username.length < 10 || formState.username.length > 50) {
+        newErrors.username = 'Username must be between 10 and 50 characters.';
+      }
     }
 
     if (touchedFields.password) {
-      if (formState.password.length < 20 || formState.password.length > 50) {
+      if (!formState.password.trim()) {
+        newErrors.password = 'Password is required';
+      } else if (formState.password.length < 20 || formState.password.length > 50) {
         newErrors.password = 'Password must be between 20 and 50 characters.';
       } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
         newErrors.password = 'Password must contain at least one letter and one number.';

@@ -16,7 +16,8 @@ export function CreateNewAccount() {
   const [isValid, setIsValid] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsValid(validate());
+    const isFormValid = validate();
+    setIsValid(isFormValid);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState, passwordStrength]);
 
@@ -50,6 +51,7 @@ export function CreateNewAccount() {
               name="username"
               label="Username"
               disabled={pending}
+              required={true}
               onChange={(value) => handleChange('username', value)}
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
@@ -67,6 +69,7 @@ export function CreateNewAccount() {
               label="Password"
               className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
               disabled={pending}
+              required={true}
               onChange={(value) => handleChange('password', value)}
             />
             {/* Error message for password */}
