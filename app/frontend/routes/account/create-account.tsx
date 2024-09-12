@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FC, FormEvent, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { PasswordStrengthMeter } from './password-strength';
 import { Spinner } from 'app/frontend/reusable-components/spinner';
@@ -31,7 +31,7 @@ export function CreateNewAccount() {
       <Card title="Create New Account" showWealthFrontLogo={true}>
         <form onSubmit={onSubmit} noValidate className="space-y-6">
           {/* Hidden funFact input for bot detection */}
-          <div className="hidden">
+          <div className="form-group hidden">
             <Input
               type="text"
               name="funFact"
@@ -43,7 +43,7 @@ export function CreateNewAccount() {
           </div>
 
           {/* Username input using Input component */}
-          <div className="form-group">
+          <div className="space-y-5 form-group">
             <Input
               type="text"
               name="username"
@@ -59,7 +59,7 @@ export function CreateNewAccount() {
           </div>
 
           {/* Password input using Input component */}
-          <div className="form-group">
+          <div className="space-y-5 form-group">
             <Input
               type="password"
               name="password"
@@ -84,25 +84,36 @@ export function CreateNewAccount() {
             ) : null}
           </div>
 
-          <Button
-            classNames={twMerge(
-              'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
-              pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
-            )}
-            type="submit"
-            isDisabled={pending || !isValid}
-          >
-            {pending ? (
-              <div className="flex items-center gap-2 ">
-                <Spinner />
-                <span>Creating Account...</span>
-              </div>
-            ) : (
-              <span>Create Account</span>
-            )}
-          </Button>
+          <FormSubmitButton isValid={isValid} pending={pending} />
         </form>
       </Card>
     </FlowLayout>
   );
 }
+
+type FormSubmitButtonProps = {
+  pending?: boolean;
+  isValid?: boolean;
+};
+
+const FormSubmitButton: FC<FormSubmitButtonProps> = ({ isValid, pending }) => {
+  return (
+    <Button
+      classNames={twMerge(
+        'w-full text-center rounded-xl disabled:opacity-50 flex items-center justify-center',
+        pending ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-[hsla(244,49%,39%,1)]'
+      )}
+      type="submit"
+      isDisabled={pending || !isValid}
+    >
+      {pending ? (
+        <div className="flex items-center gap-2 ">
+          <Spinner />
+          <span>Creating Account...</span>
+        </div>
+      ) : (
+        <span>Create Account</span>
+      )}
+    </Button>
+  );
+};
