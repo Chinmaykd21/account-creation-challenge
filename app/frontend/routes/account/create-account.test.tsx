@@ -4,17 +4,10 @@ import '@testing-library/jest-dom'; // Provides custom matchers like .toBeInTheD
 import { CreateNewAccount } from './create-account'; // Adjust the import path as necessary
 import zxcvbn from 'zxcvbn'; // Mocking zxcvbn library
 import { MemoryRouter } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
 
 jest.mock('zxcvbn', () => jest.fn(() => ({ score: 1 }))); // Default mock returns weak password strength
+
 global.fetch = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
-}));
-
-// const mockNavigate = useNavigate as jest.Mock;
 
 describe('CreateNewAccount Component', () => {
   beforeEach(() => {
