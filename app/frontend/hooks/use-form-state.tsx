@@ -18,12 +18,21 @@ export const useFormState = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const [touchedFields, setTouchedFields] = useState<{ [key in keyof AccountFormSchema]?: boolean }>({
+    username: false,
+    password: false,
+  });
 
   // Handle input changes and update form state
   const handleChange = (name: keyof AccountFormSchema, value: string) => {
     setFormState((prevState) => ({
       ...prevState,
       [name]: value,
+    }));
+
+    setTouchedFields((prevState) => ({
+      ...prevState,
+      [name]: true,
     }));
 
     // Check password strength when the password field changes
@@ -37,16 +46,18 @@ export const useFormState = () => {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (formState.username.length < 10 || formState.username.length > 50) {
+    if (touchedFields.username && (formState.username.length < 10 || formState.username.length > 50)) {
       newErrors.username = 'Username must be between 10 and 50 characters.';
     }
 
-    if (formState.password.length < 20 || formState.password.length > 50) {
-      newErrors.password = 'Password must be between 20 and 50 characters.';
-    } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
-      newErrors.password = 'Password must contain at least one letter and one number.';
-    } else if (passwordStrength < 2) {
-      newErrors.password = 'Password strength must be at least 2 (medium).';
+    if (touchedFields.password) {
+      if (formState.password.length < 20 || formState.password.length > 50) {
+        newErrors.password = 'Password must be between 20 and 50 characters.';
+      } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
+        newErrors.password = 'Password must contain at least one letter and one number.';
+      } else if (passwordStrength < 2) {
+        newErrors.password = 'Password strength must be at least 2 (medium).';
+      }
     }
 
     setErrors(newErrors);
@@ -58,6 +69,7 @@ export const useFormState = () => {
     handleChange,
     validate,
     passwordStrength,
+    touchedFields,
     errors,
   };
 };

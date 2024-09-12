@@ -11,7 +11,7 @@ import { useFormState } from 'app/frontend/hooks/use-form-state';
 import { useFormSubmission } from 'app/frontend/hooks/use-form-submission';
 
 export function CreateNewAccount() {
-  const { formState, errors, handleChange, passwordStrength, validate } = useFormState();
+  const { formState, errors, handleChange, passwordStrength, touchedFields, validate } = useFormState();
   const { isBot, pending, submissionError, handleSubmit } = useFormSubmission();
   const [isValid, setIsValid] = useState<boolean>(false);
 
@@ -55,7 +55,7 @@ export function CreateNewAccount() {
             />
             {/* Error message for username */}
             <div className="min-h-[10px]" id="username-error">
-              {errors.username && <FormError message={errors.username} />}
+              {touchedFields.username && errors.username && <FormError message={errors.username} />}
             </div>
           </div>
 
@@ -71,7 +71,7 @@ export function CreateNewAccount() {
             />
             {/* Error message for password */}
             <div className="min-h-[10px]" id="password-error">
-              {errors.password && <FormError message={errors.password} />}
+              {touchedFields.username && errors.password && <FormError message={errors.password} />}
             </div>
           </div>
 
