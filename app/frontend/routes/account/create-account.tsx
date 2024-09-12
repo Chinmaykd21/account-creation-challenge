@@ -8,6 +8,7 @@ import { FormError } from 'app/frontend/reusable-components/form/form-error';
 import { Input } from 'app/frontend/reusable-components/input/input';
 import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
 import { Card } from 'app/frontend/reusable-components/card/card';
+import { useNavigate } from 'react-router-dom';
 
 // Define the form state schema
 interface AccountFormSchema {
@@ -23,6 +24,7 @@ interface FormErrors {
 }
 
 export function CreateNewAccount() {
+  const navigate = useNavigate();
   const [formState, setFormState] = useState<AccountFormSchema>({
     username: '',
     password: '',
@@ -94,7 +96,7 @@ export function CreateNewAccount() {
       const data = await response.json();
       if (data.token) {
         localStorage.setItem('token', data.token);
-        window.location.href = '/signup/account-selection';
+        navigate('/signup/account-selection');
       } else {
         setSubmissionError(data.error || '[account_creation_error]: Account creation failed');
       }
@@ -111,12 +113,13 @@ export function CreateNewAccount() {
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {/* Hidden funFact input for bot detection */}
           <div className="hidden">
-            <label htmlFor="funFact">Honeypot</label>
-            <input
+            <Input
               type="text"
               name="funFact"
-              value={formState.funFact}
-              onChange={(e) => handleChange('funFact', e.target.value)}
+              label="FunFact"
+              disabled={pending}
+              onChange={(value) => handleChange('funFact', value)}
+              className="border-b-2 border-gray-300 focus:border-blue-500 outline-none w-full p-2"
             />
           </div>
 
