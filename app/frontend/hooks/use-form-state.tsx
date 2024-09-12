@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import zxcvbn from 'zxcvbn';
 
-type AccountFormSchema = {
+export type AccountFormSchema = {
   username: string;
   password: string;
   funFact: string; // Bot detection field
