@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import zxcvbn from 'zxcvbn'; // Password strength library
 import { twMerge } from 'tailwind-merge';
 import { PasswordStrengthMeter } from './password-strength';
 import { Spinner } from 'app/frontend/reusable-components/spinner';
@@ -9,67 +8,14 @@ import { Input } from 'app/frontend/reusable-components/input/input';
 import { FlowLayout } from 'app/frontend/reusable-components/flow-layout/flow-layout';
 import { Card } from 'app/frontend/reusable-components/card/card';
 import { useNavigate } from 'react-router-dom';
-
-// Define the form state schema
-interface AccountFormSchema {
-  username: string;
-  password: string;
-  funFact: string; // Bot detection field
-}
-
-// Define possible error states for the form
-interface FormErrors {
-  username?: string;
-  password?: string;
-}
+import { useFormState } from 'app/frontend/hooks/use-form-state';
 
 export function CreateNewAccount() {
   const navigate = useNavigate();
-  const [formState, setFormState] = useState<AccountFormSchema>({
-    username: '',
-    password: '',
-    funFact: '', // Bot detection field
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const { formState, errors, handleChange, passwordStrength, validate } = useFormState();
   const [pending, setPending] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
   const [isBot, setIsBot] = useState<boolean>(false);
-
-  // Handle input changes
-  const handleChange = (name: keyof AccountFormSchema, value: string) => {
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-
-    // Check password strength when the password field changes
-    if (name === 'password') {
-      const strength = zxcvbn(value).score;
-      setPasswordStrength(strength);
-    }
-  };
-
-  // Validate the form inputs
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (formState.username.length < 10 || formState.username.length > 50) {
-      newErrors.username = 'Username must be between 10 and 50 characters.';
-    }
-
-    if (formState.password.length < 20 || formState.password.length > 50) {
-      newErrors.password = 'Password must be between 20 and 50 characters.';
-    } else if (!/^(?=.*[a-zA-Z])(?=.*[1-9]).*$/.test(formState.password)) {
-      newErrors.password = 'Password must contain at least one letter and one number.';
-    } else if (passwordStrength < 2) {
-      newErrors.password = 'Password strength must be at least 2 (medium).';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   // Handle form submission
   const handleSubmit = async (event: React.FormEvent) => {
